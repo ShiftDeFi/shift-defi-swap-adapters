@@ -21,6 +21,7 @@ contract CustomPool is AccessControl, ReentrancyGuard, ISwapAdapter, ICustomPool
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
+    /// @inheritdoc ICustomPool
     function setPrice(
         address tokenIn,
         address tokenOut,
@@ -32,6 +33,7 @@ contract CustomPool is AccessControl, ReentrancyGuard, ISwapAdapter, ICustomPool
         emit SetPrice(tokenIn, tokenOut, numerator, denominator);
     }
 
+    /// @inheritdoc ISwapAdapter
     function swap(
         address tokenIn,
         address tokenOut,
@@ -39,7 +41,7 @@ contract CustomPool is AccessControl, ReentrancyGuard, ISwapAdapter, ICustomPool
         uint256,
         address receiver,
         bytes calldata
-    ) external payable nonReentrant {
+    ) external payable override nonReentrant {
         Price memory priceData = price[tokenIn][tokenOut];
         require(priceData.numerator > 0 && priceData.denominator > 0, PriceNotSet());
 

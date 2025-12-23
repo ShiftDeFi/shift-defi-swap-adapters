@@ -18,6 +18,7 @@ contract OneInchAdapter is ReentrancyGuard, ISwapAdapter, IOneInchAdapter {
         oneInchRouter = _oneInchRouter;
     }
 
+    /// @inheritdoc ISwapAdapter
     function swap(
         address tokenIn,
         address tokenOut,
@@ -25,7 +26,7 @@ contract OneInchAdapter is ReentrancyGuard, ISwapAdapter, IOneInchAdapter {
         uint256 minAmountOut,
         address receiver,
         bytes memory data
-    ) external payable nonReentrant {
+    ) external payable override nonReentrant {
         IERC20(tokenIn).safeTransferFrom(msg.sender, address(this), amountIn);
         IERC20(tokenIn).forceApprove(oneInchRouter, amountIn);
 

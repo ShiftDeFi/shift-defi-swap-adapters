@@ -29,18 +29,21 @@ contract UniswapV3Adapter is AccessControl, ReentrancyGuard, ISwapAdapter, IUnis
         _;
     }
 
+    /// @inheritdoc IUniswapV3Adapter
     function whitelistPath(address tokenIn, address tokenOut, uint24 fee) external onlyWhitelistManager {
         bytes memory path = abi.encodePacked(tokenIn, fee, tokenOut);
         whitelistedPaths[path] = true;
         emit PathWhitelisted(tokenIn, tokenOut, fee, path);
     }
 
+    /// @inheritdoc IUniswapV3Adapter
     function blacklistPath(address tokenIn, address tokenOut, uint24 fee) external onlyWhitelistManager {
         bytes memory path = abi.encodePacked(tokenIn, fee, tokenOut);
         whitelistedPaths[path] = false;
         emit PathBlacklisted(tokenIn, tokenOut, fee, path);
     }
 
+    /// @inheritdoc ISwapAdapter
     function swap(
         address tokenIn,
         address tokenOut,

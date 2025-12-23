@@ -29,10 +29,12 @@ contract UniversalAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, IUniv
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
+    /// @inheritdoc IUniversalAdapter
     function isSwapSupported(address tokenIn, address tokenOut) external view override returns (bool) {
         return swapInfos[tokenIn][tokenOut].router != address(0) && swapInfos[tokenIn][tokenOut].payload.length > 0;
     }
 
+    /// @inheritdoc ISwapAdapter
     function swap(
         address tokenIn,
         address tokenOut,
@@ -54,6 +56,7 @@ contract UniversalAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, IUniv
         IERC20(tokenOut).safeTransfer(receiver, amountOutAfter);
     }
 
+    /// @inheritdoc IUniversalAdapter
     function setSwapInfo(
         address fromToken,
         address toToken,
