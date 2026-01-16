@@ -18,6 +18,7 @@ interface ICurveAdapter {
     );
 
     error PathNotWhitelisted(bytes32 pathKey);
+    error ZeroAddress();
 
     struct SwapLocalVariables {
         bytes32 pathKey;

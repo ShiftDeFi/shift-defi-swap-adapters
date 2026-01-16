@@ -19,9 +19,13 @@ contract CurveAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, ICurveAda
 
     bytes32 private constant WHITELIST_MANAGER_ROLE = keccak256("WHITELIST_MANAGER_ROLE");
 
-    constructor(address defaultAdmin, address _curveRouter) {
+    constructor(address _defaultAdmin, address _curveRouter, address _whitelistManager) {
+        if (_defaultAdmin == address(0)) revert ZeroAddress();
+        if (_curveRouter == address(0)) revert ZeroAddress();
+        if (_whitelistManager == address(0)) revert ZeroAddress();
         curveRouter = _curveRouter;
-        _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+        _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
+        _grantRole(WHITELIST_MANAGER_ROLE, _whitelistManager);
     }
 
     /// @inheritdoc ICurveAdapter

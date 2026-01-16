@@ -21,12 +21,8 @@ contract CurveAdapterBase is Base {
         shiftSwapRouter = 0x14D3f12063209FBE9D11117F4a78a3a620622F93;
         vm.label(shiftSwapRouter, "SHIFT_SWAP_ROUTER");
 
-        curveAdapter = new CurveAdapter(roles.defaultAdmin, CURVE_ROUTER);
+        curveAdapter = new CurveAdapter(roles.defaultAdmin, CURVE_ROUTER, roles.whitelistManager);
         vm.label(address(curveAdapter), "CURVE_ADAPTER");
-
-        vm.prank(roles.defaultAdmin);
-        AccessControl(address(curveAdapter)).grantRole(WHITELIST_MANAGER_ROLE, roles.whitelistManager);
-
         vm.label(CURVE_ROUTER, "CURVE_ROUTER");
         vm.label(WETH, "WETH");
         vm.label(CURVE_TRICRYPTO_OPTIMIZED_WETH, "CURVE_TRICRYPTO_OPTIMIZED_WETH");
