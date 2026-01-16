@@ -7,6 +7,7 @@ interface ICurveAdapter {
 
     error PathNotWhitelisted(bytes32 pathKey);
     error ZeroAddress();
+    error ZeroAmount();
 
     struct SwapLocalVariables {
         bytes32 pathKey;
@@ -14,7 +15,6 @@ interface ICurveAdapter {
         uint256[5][5] swapParams;
         address[5] pools;
         uint256 balanceBefore;
-        uint256 balanceAfter;
         uint256 deltaTokenOut;
     }
 

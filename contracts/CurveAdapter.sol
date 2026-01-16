@@ -65,6 +65,7 @@ contract CurveAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, ICurveAda
         address receiver,
         bytes calldata data
     ) external payable override nonReentrant {
+        if (amountIn == 0) revert ZeroAmount();
         SwapLocalVariables memory vars;
 
         (vars.route, vars.swapParams, vars.pools) = abi.decode(data, (address[11], uint256[5][5], address[5]));
@@ -76,8 +77,7 @@ contract CurveAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, ICurveAda
 
         vars.balanceBefore = IERC20(tokenOut).balanceOf(address(this));
         ICurveRouter(curveRouter).exchange(vars.route, vars.swapParams, amountIn, minAmountOut, vars.pools);
-        vars.balanceAfter = IERC20(tokenOut).balanceOf(address(this));
-        vars.deltaTokenOut = vars.balanceAfter - vars.balanceBefore;
+        vars.deltaTokenOut = IERC20(tokenOut).balanceOf(address(this)) - vars.balanceBefore;
         require(vars.deltaTokenOut >= minAmountOut, SlippageNotMet(tokenOut, vars.deltaTokenOut, minAmountOut));
 
         IERC20(tokenOut).safeTransfer(receiver, vars.deltaTokenOut);
