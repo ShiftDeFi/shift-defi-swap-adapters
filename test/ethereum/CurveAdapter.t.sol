@@ -64,16 +64,16 @@ contract CurveAdapterTest is CurveAdapterBaseTest {
 
     function test_SwapWETHToSUSDEUsingPredefinedPath() public {
         uint256 amountIn = 1 ether;
+        uint256 minAmountOut = 1000 * 1e18;
         deal(WETH, address(this), amountIn);
         (address[11] memory route, address[5] memory pools, uint256[5][5] memory swapParams) = _input();
 
         _whitelistPath(WETH, SUSDE, route, swapParams, pools);
 
-        IERC20(WETH).forceApprove(address(curveAdapter), amountIn);
+        IERC20(WETH).safeIncreaseAllowance(address(curveAdapter), amountIn);
 
-        uint256 balanceBefore = IERC20(SUSDE).balanceOf(address(this));
-        curveAdapter.swap(WETH, SUSDE, amountIn, 0, address(this), abi.encode(route, swapParams, pools));
-        uint256 balanceAfter = IERC20(SUSDE).balanceOf(address(this));
-        assertGt(balanceAfter, balanceBefore);
+        curveAdapter.swap(WETH, SUSDE, amountIn, minAmountOut, address(this), abi.encode(route, swapParams, pools));
+        uint256 outputAmount = IERC20(SUSDE).balanceOf(address(this));
+        assertGt(outputAmount, minAmountOut);
     }
 }
