@@ -72,10 +72,10 @@ contract CurveAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, ICurveAda
         vars.pathKey = _computeKey(tokenIn, tokenOut, vars.route, vars.swapParams, vars.pools);
         require(_whitelistedPaths[vars.pathKey], PathNotWhitelisted(vars.pathKey));
 
+        vars.balanceBefore = IERC20(tokenOut).balanceOf(address(this));
         IERC20(tokenIn).safeTransferFrom(msg.sender, address(this), amountIn);
         IERC20(tokenIn).safeIncreaseAllowance(curveRouter, amountIn);
 
-        vars.balanceBefore = IERC20(tokenOut).balanceOf(address(this));
         ICurveRouter(curveRouter).exchange(vars.route, vars.swapParams, amountIn, minAmountOut, vars.pools);
         vars.deltaTokenOut = IERC20(tokenOut).balanceOf(address(this)) - vars.balanceBefore;
         require(vars.deltaTokenOut >= minAmountOut, SlippageNotMet(tokenOut, vars.deltaTokenOut, minAmountOut));
