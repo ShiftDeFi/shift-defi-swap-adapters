@@ -72,7 +72,7 @@ contract CurveAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, ICurveAda
         require(_whitelistedPaths[vars.pathKey], PathNotWhitelisted(vars.pathKey));
 
         IERC20(tokenIn).safeTransferFrom(msg.sender, address(this), amountIn);
-        IERC20(tokenIn).forceApprove(curveRouter, amountIn);
+        IERC20(tokenIn).safeIncreaseAllowance(curveRouter, amountIn);
 
         vars.balanceBefore = IERC20(tokenOut).balanceOf(address(this));
         ICurveRouter(curveRouter).exchange(vars.route, vars.swapParams, amountIn, minAmountOut, vars.pools);
@@ -83,6 +83,7 @@ contract CurveAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, ICurveAda
         IERC20(tokenOut).safeTransfer(receiver, vars.deltaTokenOut);
     }
 
+    /// @inheritdoc ICurveAdapter
     function whitelistedPaths(
         address tokenIn,
         address tokenOut,
