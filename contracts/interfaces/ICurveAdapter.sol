@@ -6,6 +6,7 @@ interface ICurveAdapter {
     event PathBlacklisted(address indexed tokenIn, address indexed tokenOut);
 
     error PathNotWhitelisted(bytes32 pathKey);
+    error PathAlreadyWhitelisted(bytes32 pathKey);
     error ZeroAddress();
     error ZeroAmount();
 
