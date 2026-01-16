@@ -18,7 +18,6 @@ interface ICurveAdapter {
     );
 
     error PathNotWhitelisted(bytes32 pathKey);
-    error NotWhitelistedManager(address sender);
 
     struct SwapLocalVariables {
         bytes32 pathKey;

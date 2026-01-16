@@ -19,11 +19,6 @@ contract CurveAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, ICurveAda
 
     bytes32 private constant WHITELIST_MANAGER_ROLE = keccak256("WHITELIST_MANAGER_ROLE");
 
-    modifier onlyWhitelistManager() {
-        require(hasRole(WHITELIST_MANAGER_ROLE, msg.sender), NotWhitelistedManager(msg.sender));
-        _;
-    }
-
     constructor(address defaultAdmin, address _curveRouter) {
         curveRouter = _curveRouter;
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
@@ -36,7 +31,7 @@ contract CurveAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, ICurveAda
         address[11] memory route,
         uint256[5][5] memory swapParams,
         address[5] memory pools
-    ) external onlyWhitelistManager {
+    ) external onlyRole(WHITELIST_MANAGER_ROLE) {
         _whitelistedPaths[_computeKey(tokenIn, tokenOut, route, swapParams, pools)] = true;
         emit PathWhitelisted(tokenIn, tokenOut, route, swapParams, pools);
     }
@@ -48,7 +43,7 @@ contract CurveAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, ICurveAda
         address[11] memory route,
         uint256[5][5] memory swapParams,
         address[5] memory pools
-    ) external onlyWhitelistManager {
+    ) external onlyRole(WHITELIST_MANAGER_ROLE) {
         _whitelistedPaths[_computeKey(tokenIn, tokenOut, route, swapParams, pools)] = false;
         emit PathBlacklisted(tokenIn, tokenOut, route, swapParams, pools);
     }
