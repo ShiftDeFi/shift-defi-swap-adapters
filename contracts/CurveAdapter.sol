@@ -39,7 +39,7 @@ contract CurveAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, ICurveAda
         bytes32 pathKey = _computeKey(tokenIn, tokenOut, route, swapParams, pools);
         if (_whitelistedPaths[pathKey]) return;
         _whitelistedPaths[pathKey] = true;
-        emit PathWhitelisted(tokenIn, tokenOut, route, swapParams, pools);
+        emit PathWhitelisted(tokenIn, tokenOut);
     }
 
     /// @inheritdoc ICurveAdapter
@@ -53,7 +53,7 @@ contract CurveAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, ICurveAda
         bytes32 pathKey = _computeKey(tokenIn, tokenOut, route, swapParams, pools);
         if (!_whitelistedPaths[pathKey]) return;
         _whitelistedPaths[pathKey] = false;
-        emit PathBlacklisted(tokenIn, tokenOut, route, swapParams, pools);
+        emit PathBlacklisted(tokenIn, tokenOut);
     }
 
     /// @inheritdoc ISwapAdapter

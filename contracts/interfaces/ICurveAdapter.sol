@@ -2,20 +2,8 @@
 pragma solidity ^0.8.28;
 
 interface ICurveAdapter {
-    event PathWhitelisted(
-        address indexed tokenIn,
-        address indexed tokenOut,
-        address[11] route,
-        uint256[5][5] swapParams,
-        address[5] pools
-    );
-    event PathBlacklisted(
-        address indexed tokenIn,
-        address indexed tokenOut,
-        address[11] route,
-        uint256[5][5] swapParams,
-        address[5] pools
-    );
+    event PathWhitelisted(address indexed tokenIn, address indexed tokenOut);
+    event PathBlacklisted(address indexed tokenIn, address indexed tokenOut);
 
     error PathNotWhitelisted(bytes32 pathKey);
     error ZeroAddress();
