@@ -36,7 +36,9 @@ contract CurveAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, ICurveAda
         uint256[5][5] memory swapParams,
         address[5] memory pools
     ) external onlyRole(WHITELIST_MANAGER_ROLE) {
-        _whitelistedPaths[_computeKey(tokenIn, tokenOut, route, swapParams, pools)] = true;
+        bytes32 pathKey = _computeKey(tokenIn, tokenOut, route, swapParams, pools);
+        if (_whitelistedPaths[pathKey]) return;
+        _whitelistedPaths[pathKey] = true;
         emit PathWhitelisted(tokenIn, tokenOut, route, swapParams, pools);
     }
 
@@ -48,7 +50,9 @@ contract CurveAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, ICurveAda
         uint256[5][5] memory swapParams,
         address[5] memory pools
     ) external onlyRole(WHITELIST_MANAGER_ROLE) {
-        _whitelistedPaths[_computeKey(tokenIn, tokenOut, route, swapParams, pools)] = false;
+        bytes32 pathKey = _computeKey(tokenIn, tokenOut, route, swapParams, pools);
+        if (!_whitelistedPaths[pathKey]) return;
+        _whitelistedPaths[pathKey] = false;
         emit PathBlacklisted(tokenIn, tokenOut, route, swapParams, pools);
     }
 
