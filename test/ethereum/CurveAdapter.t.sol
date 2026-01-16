@@ -24,35 +24,11 @@ contract CurveAdapterTest is CurveAdapterBase {
         assertTrue(curveAdapter.whitelistedPaths(tokenIn, tokenOut, route, swapParams, pools));
     }
 
-    function testFuzz_WhitelistPath(
-        address tokenIn,
-        address tokenOut,
-        address[11] memory route,
-        uint256[5][5] memory swapParams,
-        address[5] memory pools
-    ) public {
-        assertFalse(curveAdapter.whitelistedPaths(tokenIn, tokenOut, route, swapParams, pools));
-        _whitelistPath(tokenIn, tokenOut, route, swapParams, pools);
-    }
-
-    function testFuzz_BlacklistPath(
-        address tokenIn,
-        address tokenOut,
-        address[11] memory route,
-        uint256[5][5] memory swapParams,
-        address[5] memory pools
-    ) public {
-        _whitelistPath(tokenIn, tokenOut, route, swapParams, pools);
-
-        vm.prank(roles.whitelistManager);
-        curveAdapter.blacklistPath(tokenIn, tokenOut, route, swapParams, pools);
-        assertFalse(curveAdapter.whitelistedPaths(tokenIn, tokenOut, route, swapParams, pools));
-    }
-
-    function test_Swap() public {
-        uint256 amountIn = 1 ether;
-        deal(WETH, address(this), amountIn);
-        address[11] memory route = [
+    function _input()
+        private
+        returns (address[11] memory route, address[5] memory pools, uint256[5][5] memory swapParams)
+    {
+        route = [
             WETH,
             CURVE_TRICRYPTO_OPTIMIZED_WETH,
             CRVUSD,
@@ -65,20 +41,40 @@ contract CurveAdapterTest is CurveAdapterBase {
             address(0),
             address(0)
         ];
-        address[5] memory pools = [
-            CURVE_TRICRYPTO_OPTIMIZED_WETH,
-            SUSDE_CRVUSD_POOL,
-            address(0),
-            address(0),
-            address(0)
-        ];
-        uint256[5][5] memory swapParams = [
+        pools = [CURVE_TRICRYPTO_OPTIMIZED_WETH, SUSDE_CRVUSD_POOL, address(0), address(0), address(0)];
+        swapParams = [
             [uint256(1), 0, 1, 30, 3],
             [uint256(0), 1, 1, 10, 2],
             [uint256(0), 0, 0, 0, 0],
             [uint256(0), 0, 0, 0, 0],
             [uint256(0), 0, 0, 0, 0]
         ];
+    }
+
+    function test_WhitelistPath() public {
+        address tokenIn = WETH;
+        address tokenOut = SUSDE;
+        (address[11] memory route, address[5] memory pools, uint256[5][5] memory swapParams) = _input();
+
+        assertFalse(curveAdapter.whitelistedPaths(tokenIn, tokenOut, route, swapParams, pools));
+        _whitelistPath(tokenIn, tokenOut, route, swapParams, pools);
+    }
+
+    function test_BlacklistPath() public {
+        address tokenIn = WETH;
+        address tokenOut = SUSDE;
+        (address[11] memory route, address[5] memory pools, uint256[5][5] memory swapParams) = _input();
+        _whitelistPath(tokenIn, tokenOut, route, swapParams, pools);
+
+        vm.prank(roles.whitelistManager);
+        curveAdapter.blacklistPath(tokenIn, tokenOut, route, swapParams, pools);
+        assertFalse(curveAdapter.whitelistedPaths(tokenIn, tokenOut, route, swapParams, pools));
+    }
+
+    function test_SwapWETHToSUSDEUsingPredefinedPath() public {
+        uint256 amountIn = 1 ether;
+        deal(WETH, address(this), amountIn);
+        (address[11] memory route, address[5] memory pools, uint256[5][5] memory swapParams) = _input();
 
         _whitelistPath(WETH, SUSDE, route, swapParams, pools);
 
