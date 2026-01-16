@@ -1,15 +1,21 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import {CurveAdapterBase} from "test/ethereum/CurveAdapterBase.t.sol";
+import {CurveAdapter} from "contracts/CurveAdapter.sol";
+import {EthereumBase} from "test/ethereum/EthereumBase.t.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract CurveAdapterTest is CurveAdapterBase {
+contract CurveAdapterTest is EthereumBase {
     using SafeERC20 for IERC20;
+
+    CurveAdapter internal curveAdapter;
 
     function setUp() public override {
         super.setUp();
+
+        curveAdapter = new CurveAdapter(roles.defaultAdmin, CURVE_ROUTER, roles.whitelistManager);
+        vm.label(address(curveAdapter), "CURVE_ADAPTER");
     }
 
     function _whitelistPath(
@@ -26,6 +32,7 @@ contract CurveAdapterTest is CurveAdapterBase {
 
     function _input()
         private
+        pure
         returns (address[11] memory route, address[5] memory pools, uint256[5][5] memory swapParams)
     {
         route = [
