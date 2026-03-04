@@ -44,16 +44,16 @@ contract UniversalAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, IUniv
         bytes calldata
     ) external payable override nonReentrant {
         require(swapInfos[tokenIn][tokenOut].router != address(0), NoSwapInfo(tokenIn, tokenOut));
-        IERC20(tokenIn).safeTransferFrom(msg.sender, address(this), amountIn);
 
         uint256 amountOutBefore = IERC20(tokenOut).balanceOf(address(this));
+
+        IERC20(tokenIn).safeTransferFrom(msg.sender, address(this), amountIn);
+
         _executeSwap(swapInfos[tokenIn][tokenOut], tokenIn, amountIn);
-        uint256 amountOutAfter = IERC20(tokenOut).balanceOf(address(this));
-        require(
-            amountOutAfter - amountOutBefore >= minAmountOut,
-            SlippageNotMet(tokenOut, amountOutAfter - amountOutBefore, minAmountOut)
-        );
-        IERC20(tokenOut).safeTransfer(receiver, amountOutAfter);
+
+        uint256 receivedAmount = IERC20(tokenOut).balanceOf(address(this)) - amountOutBefore;
+        require(receivedAmount >= minAmountOut, SlippageNotMet(tokenOut, receivedAmount, minAmountOut));
+        IERC20(tokenOut).safeTransfer(receiver, receivedAmount);
     }
 
     /// @inheritdoc IUniversalAdapter
