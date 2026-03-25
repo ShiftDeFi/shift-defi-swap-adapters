@@ -19,6 +19,14 @@ contract OneInchAdapter is ReentrancyGuard, ISwapAdapter, IOneInchAdapter {
     }
 
     /// @inheritdoc ISwapAdapter
+    function previewSwap(
+        address tokenIn,
+        address tokenOut,
+        uint256 amountIn,
+        bytes memory data
+    ) external view override returns (uint256 amountOut) {}
+
+    /// @inheritdoc ISwapAdapter
     function swap(
         address tokenIn,
         address tokenOut,
@@ -51,7 +59,7 @@ contract OneInchAdapter is ReentrancyGuard, ISwapAdapter, IOneInchAdapter {
 
         uint256 balanceAfter = IERC20(tokenOut).balanceOf(address(this));
         uint256 deltaTokenOut = balanceAfter - balanceBefore;
-        require(deltaTokenOut >= minAmountOut, SlippageNotMet(tokenOut, deltaTokenOut, minAmountOut));
+        require(deltaTokenOut >= minAmountOut, SlippageCheckFailed(tokenOut, deltaTokenOut, minAmountOut));
         IERC20(tokenOut).safeTransfer(receiver, deltaTokenOut);
     }
 }

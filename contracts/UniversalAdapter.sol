@@ -35,6 +35,14 @@ contract UniversalAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, IUniv
     }
 
     /// @inheritdoc ISwapAdapter
+    function previewSwap(
+        address tokenIn,
+        address tokenOut,
+        uint256 amountIn,
+        bytes memory data
+    ) external view override returns (uint256 amountOut) {}
+
+    /// @inheritdoc ISwapAdapter
     function swap(
         address tokenIn,
         address tokenOut,
@@ -52,7 +60,7 @@ contract UniversalAdapter is AccessControl, ReentrancyGuard, ISwapAdapter, IUniv
         _executeSwap(swapInfos[tokenIn][tokenOut], tokenIn, amountIn);
 
         uint256 receivedAmount = IERC20(tokenOut).balanceOf(address(this)) - amountOutBefore;
-        require(receivedAmount >= minAmountOut, SlippageNotMet(tokenOut, receivedAmount, minAmountOut));
+        require(receivedAmount >= minAmountOut, SlippageCheckFailed(tokenOut, receivedAmount, minAmountOut));
         IERC20(tokenOut).safeTransfer(receiver, receivedAmount);
     }
 
