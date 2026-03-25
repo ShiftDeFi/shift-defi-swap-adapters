@@ -2,11 +2,9 @@
 pragma solidity ^0.8.0;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {UniswapV3AdapterBase} from "test/ethereum/UniswapV3AdapterBase.t.sol";
-import {console2 as console} from "forge-std/console2.sol";
 
 contract UniswapV3AdapterPathsTest is UniswapV3AdapterBase {
     using SafeERC20 for IERC20;

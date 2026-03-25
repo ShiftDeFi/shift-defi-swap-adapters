@@ -34,6 +34,14 @@ contract CustomPool is AccessControl, ReentrancyGuard, ISwapAdapter, ICustomPool
     }
 
     /// @inheritdoc ISwapAdapter
+    function previewSwap(
+        address tokenIn,
+        address tokenOut,
+        uint256 amountIn,
+        bytes memory data
+    ) external view override returns (uint256 amountOut) {}
+
+    /// @inheritdoc ISwapAdapter
     function swap(
         address tokenIn,
         address tokenOut,
