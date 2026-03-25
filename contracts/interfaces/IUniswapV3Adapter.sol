@@ -10,6 +10,7 @@ interface IUniswapV3Adapter is ISwapAdapter {
     error PathNotWhitelisted(bytes path);
     error NotWhitelistManager(address sender);
     error InvalidPathLengths(uint256 expectedLength, uint256 actualLength);
+    error ZeroHopPath();
 
     /**
      * @notice Returns the address of the Uniswap V3 router contract
