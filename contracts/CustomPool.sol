@@ -53,7 +53,7 @@ contract CustomPool is AccessControl, ReentrancyGuard, ISwapAdapter, ICustomPool
         uint256 reserveOut = IERC20(tokenOut).balanceOf(address(this));
         require(amountOut <= reserveOut, ReservesExceeded(amountOut, reserveOut));
 
-        IERC20(tokenIn).safeTransferFrom(receiver, address(this), amountIn);
+        IERC20(tokenIn).safeTransferFrom(msg.sender, address(this), amountIn);
         IERC20(tokenOut).safeTransfer(receiver, amountOut);
     }
 }

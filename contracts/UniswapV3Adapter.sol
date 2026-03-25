@@ -35,6 +35,7 @@ contract UniswapV3Adapter is AccessControl, ReentrancyGuard, IUniswapV3Adapter {
         uint24[] memory fees
     ) external onlyWhitelistManager returns (bytes memory) {
         require(tokens.length == fees.length + 1, InvalidPathLengths(tokens.length, fees.length));
+        require(fees.length > 0, ZeroHopPath());
 
         bytes memory path;
         assembly {

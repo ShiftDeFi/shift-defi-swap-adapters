@@ -8,7 +8,7 @@ interface IOneInchAdapter {
     error InvalidDestinationToken(address token);
     error InvalidAmountIn(uint256 amount);
     error InvalidMinAmountOut(uint256 amount);
-    error InvalidSrcReceiver(address receiver);
+    error InvalidDstReceiver(address receiver);
 
     /**
      * @notice Returns the address of the 1inch router contract

@@ -43,7 +43,7 @@ contract OneInchAdapter is ReentrancyGuard, ISwapAdapter, IOneInchAdapter {
             require(descs.dstToken == tokenOut, InvalidDestinationToken(descs.dstToken));
             require(descs.amount == amountIn, InvalidAmountIn(descs.amount));
             require(descs.minReturnAmount <= minAmountOut, InvalidMinAmountOut(descs.minReturnAmount));
-            require(descs.dstReceiver == address(this), InvalidSrcReceiver(descs.srcReceiver));
+            require(descs.dstReceiver == address(this), InvalidDstReceiver(descs.dstReceiver));
             IOneInchV6(oneInchRouter).swap(executor, descs, executorData);
         } else {
             revert InvalidSelector(selector);
