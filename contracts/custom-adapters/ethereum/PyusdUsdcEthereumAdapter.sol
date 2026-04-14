@@ -10,8 +10,6 @@ import {IPyusdUsdcEthereumAdapter, ISwapAdapter} from "contracts/interfaces/IPyu
 import {ICurveStableSwapNG} from "contracts/dependencies/curve/ICurveStableSwapNG.sol";
 import {ILitePsmWrapper} from "contracts/dependencies/spark/ILitePsmWrapper.sol";
 
-import {console2 as console} from "forge-std/console2.sol";
-
 contract PyusdUsdcEthereumAdapter is IPyusdUsdcEthereumAdapter {
     using Math for uint256;
     using SafeERC20 for IERC20;

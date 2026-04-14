@@ -9,7 +9,6 @@ import {IPyusdUsdcEthereumAdapter} from "contracts/interfaces/IPyusdUsdcEthereum
 import {ICurveStableSwapNG} from "contracts/dependencies/curve/ICurveStableSwapNG.sol";
 
 import {Base} from "test/Base.t.sol";
-import {console2 as console} from "forge-std/console2.sol";
 
 contract PyusdUsdcEthereumAdapterTest is Base {
     using SafeERC20 for IERC20;
