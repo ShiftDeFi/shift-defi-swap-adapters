@@ -1,10 +1,10 @@
 #!/bin/sh
 
-if [ -z "${ETHEREUM_RPC_URL:-}" ]; then
-  echo "Error: ETHEREUM_RPC_URL is not set" >&2
+if [ -z "${ETH_RPC_URL:-}" ]; then
+  echo "Error: ETH_RPC_URL is not set" >&2
   exit 1
 fi
-forge test -vvv --mp "test/ethereum/**" --fork-url $ETHEREUM_RPC_URL
+forge test -vvv --mp "test/ethereum/**" --fork-url $ETH_RPC_URL
 
 if [ $? -ne 0 ]; then
     echo "Forge tests failed! Commit aborted."
