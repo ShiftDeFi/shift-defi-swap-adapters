@@ -2,9 +2,9 @@
 pragma solidity ^0.8.28;
 
 import {Script} from "forge-std/Script.sol";
-import {console2 as console} from "forge-std/console2.sol";
 
 import {UniswapV3SwapRouter02} from "contracts/UniswapV3SwapRouter02.sol";
+import {console} from "forge-std/console.sol";
 
 /// @dev Grants WHITELIST_MANAGER_ROLE and whitelists the predefined WMON ->
 /// USDC route (fee 3000) on an already-deployed adapter. The broadcaster must
