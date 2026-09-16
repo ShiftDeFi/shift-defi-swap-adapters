@@ -8,19 +8,23 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {ISwapAdapter} from "@shift-defi/core/interfaces/ISwapAdapter.sol";
-import {IUniswapV3Router} from "./dependencies/uniswap-v3/IUniswapV3Router.sol";
-import {IUniswapV3Adapter} from "./interfaces/IUniswapV3Adapter.sol";
+import {ISwapRouter02} from "./dependencies/uniswap-v3/ISwapRouter02.sol";
+import {IUniswapV3SwapRouter02} from "./interfaces/IUniswapV3SwapRouter02.sol";
 
-contract UniswapV3Adapter is AccessControl, ReentrancyGuard, IUniswapV3Adapter {
+/// @dev Targets Uniswap's SwapRouter02 ABI (`ISwapRouter02`), whose
+/// `ExactInputParams` carries no `deadline` field - the shape actually
+/// deployed on every venue this adapter targets. All swaps go through `swap`;
+/// this adapter does not expose `exactInput`/`exactInputSingle` itself.
+contract UniswapV3SwapRouter02 is AccessControl, ReentrancyGuard, ISwapAdapter, IUniswapV3SwapRouter02 {
     using SafeERC20 for IERC20;
 
     bytes32 private constant WHITELIST_MANAGER_ROLE = keccak256("WHITELIST_MANAGER_ROLE");
 
-    address public immutable uniswapV3Router;
+    address public immutable swapRouter02;
     mapping(bytes => bool) public whitelistedPaths;
 
-    constructor(address defaultAdmin, address _uniswapV3Router) {
-        uniswapV3Router = _uniswapV3Router;
+    constructor(address defaultAdmin, address _swapRouter02) {
+        swapRouter02 = _swapRouter02;
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
     }
 
@@ -29,11 +33,12 @@ contract UniswapV3Adapter is AccessControl, ReentrancyGuard, IUniswapV3Adapter {
         _;
     }
 
-    /// @inheritdoc IUniswapV3Adapter
-    function whitelistPath(
-        address[] memory tokens,
-        uint24[] memory fees
-    ) external onlyWhitelistManager returns (bytes memory) {
+    /// @inheritdoc IUniswapV3SwapRouter02
+    function whitelistPath(address[] memory tokens, uint24[] memory fees)
+        external
+        onlyWhitelistManager
+        returns (bytes memory)
+    {
         require(tokens.length == fees.length + 1, InvalidPathLengths(tokens.length, fees.length));
         require(fees.length > 0, ZeroHopPath());
 
@@ -66,7 +71,7 @@ contract UniswapV3Adapter is AccessControl, ReentrancyGuard, IUniswapV3Adapter {
         return path;
     }
 
-    /// @inheritdoc IUniswapV3Adapter
+    /// @inheritdoc IUniswapV3SwapRouter02
     function decodePath(bytes memory path) public pure returns (address[] memory tokens, uint24[] memory fees) {
         assembly {
             let len := mload(path)
@@ -103,22 +108,22 @@ contract UniswapV3Adapter is AccessControl, ReentrancyGuard, IUniswapV3Adapter {
         }
     }
 
-    /// @inheritdoc IUniswapV3Adapter
+    /// @inheritdoc IUniswapV3SwapRouter02
     function blacklistPath(bytes calldata path) external onlyWhitelistManager {
         require(whitelistedPaths[path], PathNotWhitelisted(path));
         whitelistedPaths[path] = false;
 
-        (address[] memory tokens, ) = decodePath(path);
+        (address[] memory tokens,) = decodePath(path);
         emit PathBlacklisted(tokens[0], tokens[tokens.length - 1], path);
     }
 
     /// @inheritdoc ISwapAdapter
-    function previewSwap(
-        address tokenIn,
-        address tokenOut,
-        uint256 amountIn,
-        bytes memory data
-    ) external view override returns (uint256 amountOut) {}
+    function previewSwap(address tokenIn, address tokenOut, uint256 amountIn, bytes memory data)
+        external
+        view
+        override
+        returns (uint256 amountOut)
+    {}
 
     /// @inheritdoc ISwapAdapter
     function swap(
@@ -132,18 +137,15 @@ contract UniswapV3Adapter is AccessControl, ReentrancyGuard, IUniswapV3Adapter {
         require(whitelistedPaths[data], PathNotWhitelisted(data));
 
         IERC20(tokenIn).safeTransferFrom(msg.sender, address(this), amountIn);
-        IERC20(tokenIn).forceApprove(uniswapV3Router, amountIn);
+        IERC20(tokenIn).forceApprove(swapRouter02, amountIn);
 
         uint256 balanceBefore = IERC20(tokenOut).balanceOf(address(this));
-        IUniswapV3Router(uniswapV3Router).exactInput(
-            IUniswapV3Router.ExactInputParams({
-                deadline: block.timestamp,
-                amountIn: amountIn,
-                amountOutMinimum: minAmountOut,
-                path: data,
-                recipient: address(this)
-            })
-        );
+        ISwapRouter02(swapRouter02)
+            .exactInput(
+                ISwapRouter02.ExactInputParams({
+                    amountIn: amountIn, amountOutMinimum: minAmountOut, path: data, recipient: address(this)
+                })
+            );
         uint256 balanceAfter = IERC20(tokenOut).balanceOf(address(this));
         uint256 deltaTokenOut = balanceAfter - balanceBefore;
         require(deltaTokenOut >= minAmountOut, SlippageCheckFailed(tokenOut, deltaTokenOut, minAmountOut));
