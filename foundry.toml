@@ -1,6 +1,57 @@
+# Foundry config. [profile.ci] is what the Wall uses in CI (selected with
+# FOUNDRY_PROFILE=ci). The default profile stays fast for the local agent loop.
+
 [profile.default]
 src = "contracts"
 out = "out"
 libs = ["lib"]
+solc_version = "0.8.28" # Pinned; the gate must not float across solc versions.
+evm_version = "prague"
+# Remappings come from remappings.txt only. With auto-detection on, forge adds
+# every library under lib/ to whatever the file declares, so the file would not
+# be the full picture. Slither and Aderyn read the same resolved set.
+auto_detect_remappings = false
+optimizer = true
+optimizer_runs = 200
+
+[profile.default.fuzz]
+runs = 256 # fast enough for the inner loop
+
+[profile.default.invariant]
+runs = 128
+depth = 64
+# fail_on_revert: false = tolerant (reverts don't fail the run). Start here to
+# avoid noise; tighten to true once the invariant handlers are shaped.
+fail_on_revert = false
+
+# ---------------------------------------------------------------------------
+# CI profile: heavier and stricter. This is the authoritative gate.
+# ---------------------------------------------------------------------------
+[profile.ci]
+deny_warnings = true # compiler warnings become gate failures
+
+[profile.ci.fuzz]
+runs = 2000
+
+[profile.ci.invariant]
+runs = 512
+depth = 128
+fail_on_revert = false
+
+# ---------------------------------------------------------------------------
+# Fork testing runs locally, not in CI: fork tests live under test/fork/ and run
+# via `make fork`, which keeps `make verify` hermetic.
+#
+# Pin the block number in setUp() —
+# `vm.createSelectFork(vm.rpcUrl("ethereum"), <block>)`. Forking `latest` makes
+# runs non-reproducible.
+# ---------------------------------------------------------------------------
+[rpc_endpoints]
+ethereum = "${ETH_RPC_URL}"
+monad = "${MONAD_RPC_URL}"
+
+[etherscan]
+ethereum = { key = "${ETHERSCAN_API_KEY}" }
+monad = { key = "${MONADSCAN_API_KEY}", chain = 143 }
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

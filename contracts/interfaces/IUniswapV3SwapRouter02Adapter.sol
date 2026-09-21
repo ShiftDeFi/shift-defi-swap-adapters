@@ -1,22 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {ISwapAdapter} from "@shift-defi/core/interfaces/ISwapAdapter.sol";
-
-interface IUniswapV3Adapter is ISwapAdapter {
+interface IUniswapV3SwapRouter02Adapter {
     event PathWhitelisted(address indexed tokenIn, address indexed tokenOut, bytes path);
     event PathBlacklisted(address indexed tokenIn, address indexed tokenOut, bytes path);
 
+    error ZeroAddress();
     error PathNotWhitelisted(bytes path);
     error NotWhitelistManager(address sender);
     error InvalidPathLengths(uint256 expectedLength, uint256 actualLength);
     error ZeroHopPath();
 
     /**
-     * @notice Returns the address of the Uniswap V3 router contract
-     * @return The immutable address of the Uniswap V3 router
+     * @notice Returns the address of the Uniswap V3 SwapRouter02 contract
+     * @return The immutable address of the Uniswap V3 SwapRouter02
      */
-    function uniswapV3Router() external view returns (address);
+    function swapRouter02() external view returns (address);
 
     /**
      * @notice Returns whether a swap path is whitelisted
