@@ -4,7 +4,7 @@ pragma solidity ^0.8.28;
 import {Script} from "forge-std/Script.sol";
 import {console2 as console} from "forge-std/console2.sol";
 
-import {UniswapV3SwapRouter02} from "contracts/UniswapV3SwapRouter02.sol";
+import {UniswapV3SwapRouter02Adapter} from "contracts/UniswapV3SwapRouter02Adapter.sol";
 
 /// @dev Chain-agnostic: the adapter itself has no chain-specific logic, only
 /// the SwapRouter02 address it's constructed with does - so that's read from
@@ -16,9 +16,9 @@ contract DeployScript is Script {
         address swapRouter02 = vm.envAddress("UNISWAP_V3_SWAP_ROUTER_02");
 
         vm.startBroadcast();
-        UniswapV3SwapRouter02 adapter = new UniswapV3SwapRouter02(defaultAdmin, swapRouter02);
+        UniswapV3SwapRouter02Adapter adapter = new UniswapV3SwapRouter02Adapter(defaultAdmin, swapRouter02);
         vm.stopBroadcast();
 
-        console.log("UniswapV3SwapRouter02 deployed at: %s", address(adapter));
+        console.log("UniswapV3SwapRouter02Adapter deployed at: %s", address(adapter));
     }
 }

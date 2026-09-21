@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import {UniswapV3SwapRouter02Base} from "test/unit/UniswapV3SwapRouter02/UniswapV3SwapRouter02Base.t.sol";
+import {
+    UniswapV3SwapRouter02AdapterBase
+} from "test/unit/UniswapV3SwapRouter02Adapter/UniswapV3SwapRouter02AdapterBase.t.sol";
 
-contract UniswapV3SwapRouter02PathTest is UniswapV3SwapRouter02Base {
+contract UniswapV3SwapRouter02AdapterPathTest is UniswapV3SwapRouter02AdapterBase {
     function test_WhitelistPathSingleHop() public {
         bytes memory path = _whitelistPath();
 

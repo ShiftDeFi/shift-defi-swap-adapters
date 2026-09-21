@@ -3,7 +3,7 @@ pragma solidity ^0.8.28;
 
 import {Script} from "forge-std/Script.sol";
 
-import {UniswapV3SwapRouter02} from "contracts/UniswapV3SwapRouter02.sol";
+import {UniswapV3SwapRouter02Adapter} from "contracts/UniswapV3SwapRouter02Adapter.sol";
 import {console} from "forge-std/console.sol";
 
 /// @dev Grants WHITELIST_MANAGER_ROLE and whitelists the predefined WMON ->
@@ -18,7 +18,8 @@ contract WhitelistWmonUsdcScript is Script {
     bytes32 public constant WHITELIST_MANAGER_ROLE = keccak256("WHITELIST_MANAGER_ROLE");
 
     function run() public {
-        UniswapV3SwapRouter02 adapter = UniswapV3SwapRouter02(vm.envAddress("UNISWAP_V3_SWAP_ROUTER_02_CONTRACT"));
+        UniswapV3SwapRouter02Adapter adapter =
+            UniswapV3SwapRouter02Adapter(vm.envAddress("UNISWAP_V3_SWAP_ROUTER_02_CONTRACT"));
         address whitelistManager = vm.envAddress("WHITELIST_MANAGER");
 
         address[] memory tokens = new address[](2);

@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import {UniswapV3SwapRouter02} from "contracts/UniswapV3SwapRouter02.sol";
-import {IUniswapV3SwapRouter02} from "contracts/interfaces/IUniswapV3SwapRouter02.sol";
+import {UniswapV3SwapRouter02Adapter} from "contracts/UniswapV3SwapRouter02Adapter.sol";
+import {IUniswapV3SwapRouter02Adapter} from "contracts/interfaces/IUniswapV3SwapRouter02Adapter.sol";
 
 import {IWMON} from "test/mocks/IWMON.sol";
 import {Base} from "test/Base.t.sol";
@@ -25,14 +25,14 @@ contract WmonUsdcForkTest is Base {
     uint24 internal constant FEE = 3000;
     uint256 internal constant AMOUNT_IN = 1 ether;
 
-    UniswapV3SwapRouter02 internal uniswapV3Adapter;
+    UniswapV3SwapRouter02Adapter internal uniswapV3Adapter;
 
     function setUp() public virtual override {
         super.setUp();
 
         vm.createSelectFork(vm.rpcUrl("monad"), MONAD_FORK_BLOCK);
 
-        uniswapV3Adapter = new UniswapV3SwapRouter02(roles.defaultAdmin, UNISWAP_V3_SWAP_ROUTER_02);
+        uniswapV3Adapter = new UniswapV3SwapRouter02Adapter(roles.defaultAdmin, UNISWAP_V3_SWAP_ROUTER_02);
         vm.label(address(uniswapV3Adapter), "UNISWAP_V3_SWAP_ROUTER_02");
         vm.label(address(WMON), "WMON");
         vm.label(address(USDC), "USDC");
@@ -64,7 +64,7 @@ contract WmonUsdcForkTest is Base {
 
         vm.startPrank(users.alice);
         WMON.approve(address(uniswapV3Adapter), AMOUNT_IN);
-        vm.expectRevert(abi.encodeWithSelector(IUniswapV3SwapRouter02.PathNotWhitelisted.selector, path));
+        vm.expectRevert(abi.encodeWithSelector(IUniswapV3SwapRouter02Adapter.PathNotWhitelisted.selector, path));
         uniswapV3Adapter.swap(address(WMON), address(USDC), AMOUNT_IN, 1, users.bob, path);
         vm.stopPrank();
     }

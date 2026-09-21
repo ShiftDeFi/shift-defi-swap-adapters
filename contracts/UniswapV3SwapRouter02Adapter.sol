@@ -9,13 +9,13 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 
 import {ISwapAdapter} from "@shift-defi/core/interfaces/ISwapAdapter.sol";
 import {ISwapRouter02} from "./dependencies/uniswap-v3/ISwapRouter02.sol";
-import {IUniswapV3SwapRouter02} from "./interfaces/IUniswapV3SwapRouter02.sol";
+import {IUniswapV3SwapRouter02Adapter} from "./interfaces/IUniswapV3SwapRouter02Adapter.sol";
 
 /// @dev Targets Uniswap's SwapRouter02 ABI (`ISwapRouter02`), whose
 /// `ExactInputParams` carries no `deadline` field - the shape actually
 /// deployed on every venue this adapter targets. All swaps go through `swap`;
 /// this adapter does not expose `exactInput`/`exactInputSingle` itself.
-contract UniswapV3SwapRouter02 is AccessControl, ReentrancyGuard, ISwapAdapter, IUniswapV3SwapRouter02 {
+contract UniswapV3SwapRouter02Adapter is AccessControl, ReentrancyGuard, ISwapAdapter, IUniswapV3SwapRouter02Adapter {
     using SafeERC20 for IERC20;
 
     bytes32 private constant WHITELIST_MANAGER_ROLE = keccak256("WHITELIST_MANAGER_ROLE");
@@ -34,7 +34,7 @@ contract UniswapV3SwapRouter02 is AccessControl, ReentrancyGuard, ISwapAdapter, 
         _;
     }
 
-    /// @inheritdoc IUniswapV3SwapRouter02
+    /// @inheritdoc IUniswapV3SwapRouter02Adapter
     function whitelistPath(address[] memory tokens, uint24[] memory fees)
         external
         onlyWhitelistManager
@@ -72,7 +72,7 @@ contract UniswapV3SwapRouter02 is AccessControl, ReentrancyGuard, ISwapAdapter, 
         return path;
     }
 
-    /// @inheritdoc IUniswapV3SwapRouter02
+    /// @inheritdoc IUniswapV3SwapRouter02Adapter
     function decodePath(bytes memory path) public pure returns (address[] memory tokens, uint24[] memory fees) {
         assembly {
             let len := mload(path)
@@ -109,7 +109,7 @@ contract UniswapV3SwapRouter02 is AccessControl, ReentrancyGuard, ISwapAdapter, 
         }
     }
 
-    /// @inheritdoc IUniswapV3SwapRouter02
+    /// @inheritdoc IUniswapV3SwapRouter02Adapter
     function blacklistPath(bytes calldata path) external onlyWhitelistManager {
         require(whitelistedPaths[path], PathNotWhitelisted(path));
         whitelistedPaths[path] = false;

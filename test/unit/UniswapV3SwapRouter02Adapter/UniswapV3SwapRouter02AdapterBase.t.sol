@@ -8,8 +8,8 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 import {SwapRouter} from "@shift-defi/core/SwapRouter.sol";
 import {ISwapRouter} from "@shift-defi/core/interfaces/ISwapRouter.sol";
 
-import {UniswapV3SwapRouter02} from "contracts/UniswapV3SwapRouter02.sol";
-import {IUniswapV3SwapRouter02} from "contracts/interfaces/IUniswapV3SwapRouter02.sol";
+import {UniswapV3SwapRouter02Adapter} from "contracts/UniswapV3SwapRouter02Adapter.sol";
+import {IUniswapV3SwapRouter02Adapter} from "contracts/interfaces/IUniswapV3SwapRouter02Adapter.sol";
 
 import {Base} from "test/Base.t.sol";
 
@@ -19,8 +19,8 @@ import {Base} from "test/Base.t.sol";
 /// though, not a placeholder - the adapter is whitelisted on it, matching how
 /// it's actually reached in production. See test/fork/ for tests against a
 /// real, network-specific SwapRouter02 + pool.
-contract UniswapV3SwapRouter02Base is Base {
-    IUniswapV3SwapRouter02 internal uniswapV3Adapter;
+contract UniswapV3SwapRouter02AdapterBase is Base {
+    IUniswapV3SwapRouter02Adapter internal uniswapV3Adapter;
 
     ERC20Mock internal tokenA;
     ERC20Mock internal tokenB;
@@ -38,7 +38,7 @@ contract UniswapV3SwapRouter02Base is Base {
         tokenB = new ERC20Mock();
         vm.label(address(tokenB), "TOKEN_B");
 
-        uniswapV3Adapter = new UniswapV3SwapRouter02(roles.defaultAdmin, makeAddr("SWAP_ROUTER_02"));
+        uniswapV3Adapter = new UniswapV3SwapRouter02Adapter(roles.defaultAdmin, makeAddr("SWAP_ROUTER_02"));
         vm.label(address(uniswapV3Adapter), "UNISWAP_V3_SWAP_ROUTER_02");
 
         vm.prank(roles.defaultAdmin);
