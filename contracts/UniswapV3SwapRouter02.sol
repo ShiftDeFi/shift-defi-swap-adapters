@@ -24,6 +24,7 @@ contract UniswapV3SwapRouter02 is AccessControl, ReentrancyGuard, ISwapAdapter, 
     mapping(bytes => bool) public whitelistedPaths;
 
     constructor(address defaultAdmin, address _swapRouter02) {
+        require(_swapRouter02 != address(0), InvalidSwapRouterAddress(_swapRouter02));
         swapRouter02 = _swapRouter02;
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
     }

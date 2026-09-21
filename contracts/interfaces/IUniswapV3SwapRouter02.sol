@@ -5,6 +5,7 @@ interface IUniswapV3SwapRouter02 {
     event PathWhitelisted(address indexed tokenIn, address indexed tokenOut, bytes path);
     event PathBlacklisted(address indexed tokenIn, address indexed tokenOut, bytes path);
 
+    error InvalidSwapRouterAddress(address swapRouter02);
     error PathNotWhitelisted(bytes path);
     error NotWhitelistManager(address sender);
     error InvalidPathLengths(uint256 expectedLength, uint256 actualLength);
