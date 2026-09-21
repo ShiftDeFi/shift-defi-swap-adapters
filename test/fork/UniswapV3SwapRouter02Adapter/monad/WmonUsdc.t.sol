@@ -54,7 +54,9 @@ contract WmonUsdcForkTest is Base {
         assertEq(WMON.balanceOf(users.alice), 0, "test_Swap_WmonToUsdc: WMON not pulled from alice");
         assertGt(USDC.balanceOf(users.bob), 0, "test_Swap_WmonToUsdc: no USDC received by receiver");
         assertEq(
-            USDC.balanceOf(address(uniswapV3Adapter)), 0, "test_Swap_WmonToUsdc: USDC left stranded in the adapter"
+            USDC.balanceOf(address(uniswapV3Adapter)),
+            0,
+            "test_Swap_WmonToUsdc: USDC left stranded in the adapter"
         );
     }
 

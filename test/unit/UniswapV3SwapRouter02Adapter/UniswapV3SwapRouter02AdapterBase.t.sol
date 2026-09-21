@@ -50,13 +50,14 @@ contract UniswapV3SwapRouter02AdapterBase is Base {
 
     function _deployShiftSwapRouter() internal returns (address) {
         address implementation = address(new SwapRouter());
-        return address(
-            new TransparentUpgradeableProxy(
-                implementation,
-                roles.defaultAdmin,
-                abi.encodeWithSelector(SwapRouter.initialize.selector, roles.defaultAdmin, roles.whitelistManager)
-            )
-        );
+        return
+            address(
+                new TransparentUpgradeableProxy(
+                    implementation,
+                    roles.defaultAdmin,
+                    abi.encodeWithSelector(SwapRouter.initialize.selector, roles.defaultAdmin, roles.whitelistManager)
+                )
+            );
     }
 
     function _whitelistPath() internal returns (bytes memory path) {

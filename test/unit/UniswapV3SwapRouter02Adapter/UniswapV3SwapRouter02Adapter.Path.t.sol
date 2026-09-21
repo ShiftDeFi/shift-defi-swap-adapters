@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import {
-    UniswapV3SwapRouter02AdapterBase
-} from "test/unit/UniswapV3SwapRouter02Adapter/UniswapV3SwapRouter02AdapterBase.t.sol";
+import {UniswapV3SwapRouter02AdapterBase} from "test/unit/UniswapV3SwapRouter02Adapter/UniswapV3SwapRouter02AdapterBase.t.sol";
 
 contract UniswapV3SwapRouter02AdapterPathTest is UniswapV3SwapRouter02AdapterBase {
     function test_WhitelistPathSingleHop() public {
@@ -28,7 +26,9 @@ contract UniswapV3SwapRouter02AdapterPathTest is UniswapV3SwapRouter02AdapterBas
         uniswapV3Adapter.blacklistPath(path);
 
         assertEq(
-            uniswapV3Adapter.whitelistedPaths(path), false, "test_BlacklistPathSingleHop: path is still whitelisted"
+            uniswapV3Adapter.whitelistedPaths(path),
+            false,
+            "test_BlacklistPathSingleHop: path is still whitelisted"
         );
     }
 
