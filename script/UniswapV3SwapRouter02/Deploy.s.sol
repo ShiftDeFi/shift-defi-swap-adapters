@@ -12,7 +12,7 @@ import {UniswapV3SwapRouter02} from "contracts/UniswapV3SwapRouter02.sol";
 /// per-network scripts alongside this one.
 contract DeployScript is Script {
     function run() public {
-        address defaultAdmin = vm.envAddress("DEFAULT_ADMIN_ROLE");
+        address defaultAdmin = vm.envAddress("DEFAULT_ADMIN");
         address swapRouter02 = vm.envAddress("UNISWAP_V3_SWAP_ROUTER_02");
 
         vm.startBroadcast();
