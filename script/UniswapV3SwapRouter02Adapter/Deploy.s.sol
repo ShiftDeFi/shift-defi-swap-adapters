@@ -13,10 +13,12 @@ import {UniswapV3SwapRouter02Adapter} from "contracts/UniswapV3SwapRouter02Adapt
 contract DeployScript is Script {
     function run() public {
         address defaultAdmin = vm.envAddress("DEFAULT_ADMIN");
+        address whitelistManager = vm.envAddress("WHITELIST_MANAGER");
         address swapRouter02 = vm.envAddress("UNISWAP_V3_SWAP_ROUTER_02");
 
         vm.startBroadcast();
-        UniswapV3SwapRouter02Adapter adapter = new UniswapV3SwapRouter02Adapter(defaultAdmin, swapRouter02);
+        UniswapV3SwapRouter02Adapter adapter =
+            new UniswapV3SwapRouter02Adapter(defaultAdmin, whitelistManager, swapRouter02);
         vm.stopBroadcast();
 
         console.log("UniswapV3SwapRouter02Adapter deployed at: %s", address(adapter));

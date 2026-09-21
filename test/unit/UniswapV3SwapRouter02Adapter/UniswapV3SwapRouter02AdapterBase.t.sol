@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -38,11 +37,9 @@ contract UniswapV3SwapRouter02AdapterBase is Base {
         tokenB = new ERC20Mock();
         vm.label(address(tokenB), "TOKEN_B");
 
-        uniswapV3Adapter = new UniswapV3SwapRouter02Adapter(roles.defaultAdmin, makeAddr("SWAP_ROUTER_02"));
+        uniswapV3Adapter =
+            new UniswapV3SwapRouter02Adapter(roles.defaultAdmin, roles.whitelistManager, makeAddr("SWAP_ROUTER_02"));
         vm.label(address(uniswapV3Adapter), "UNISWAP_V3_SWAP_ROUTER_02");
-
-        vm.prank(roles.defaultAdmin);
-        AccessControl(address(uniswapV3Adapter)).grantRole(WHITELIST_MANAGER_ROLE, roles.whitelistManager);
 
         vm.prank(roles.whitelistManager);
         ISwapRouter(shiftSwapRouter).whitelistSwapAdapter(address(uniswapV3Adapter));
@@ -50,14 +47,13 @@ contract UniswapV3SwapRouter02AdapterBase is Base {
 
     function _deployShiftSwapRouter() internal returns (address) {
         address implementation = address(new SwapRouter());
-        return
-            address(
-                new TransparentUpgradeableProxy(
-                    implementation,
-                    roles.defaultAdmin,
-                    abi.encodeWithSelector(SwapRouter.initialize.selector, roles.defaultAdmin, roles.whitelistManager)
-                )
-            );
+        return address(
+            new TransparentUpgradeableProxy(
+                implementation,
+                roles.defaultAdmin,
+                abi.encodeWithSelector(SwapRouter.initialize.selector, roles.defaultAdmin, roles.whitelistManager)
+            )
+        );
     }
 
     function _whitelistPath() internal returns (bytes memory path) {

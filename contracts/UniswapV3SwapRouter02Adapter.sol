@@ -23,10 +23,18 @@ contract UniswapV3SwapRouter02Adapter is AccessControl, ReentrancyGuard, ISwapAd
     address public immutable swapRouter02;
     mapping(bytes => bool) public whitelistedPaths;
 
-    constructor(address defaultAdmin, address _swapRouter02) {
+    /// @dev Grants `DEFAULT_ADMIN_ROLE` to `defaultAdmin` and
+    /// `WHITELIST_MANAGER_ROLE` to `whitelistManager`.
+    /// @param defaultAdmin Account that receives `DEFAULT_ADMIN_ROLE`.
+    /// @param whitelistManager Account that receives `WHITELIST_MANAGER_ROLE`.
+    /// @param _swapRouter02 Uniswap SwapRouter02 this adapter calls.
+    constructor(address defaultAdmin, address whitelistManager, address _swapRouter02) {
+        require(defaultAdmin != address(0), InvalidDefaultAdminAddress(defaultAdmin));
+        require(whitelistManager != address(0), InvalidWhitelistManagerAddress(whitelistManager));
         require(_swapRouter02 != address(0), InvalidSwapRouterAddress(_swapRouter02));
         swapRouter02 = _swapRouter02;
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+        _grantRole(WHITELIST_MANAGER_ROLE, whitelistManager);
     }
 
     modifier onlyWhitelistManager() {
@@ -35,10 +43,11 @@ contract UniswapV3SwapRouter02Adapter is AccessControl, ReentrancyGuard, ISwapAd
     }
 
     /// @inheritdoc IUniswapV3SwapRouter02Adapter
-    function whitelistPath(
-        address[] memory tokens,
-        uint24[] memory fees
-    ) external onlyWhitelistManager returns (bytes memory) {
+    function whitelistPath(address[] memory tokens, uint24[] memory fees)
+        external
+        onlyWhitelistManager
+        returns (bytes memory)
+    {
         require(tokens.length == fees.length + 1, InvalidPathLengths(tokens.length, fees.length));
         require(fees.length > 0, ZeroHopPath());
 
@@ -113,17 +122,17 @@ contract UniswapV3SwapRouter02Adapter is AccessControl, ReentrancyGuard, ISwapAd
         require(whitelistedPaths[path], PathNotWhitelisted(path));
         whitelistedPaths[path] = false;
 
-        (address[] memory tokens, ) = decodePath(path);
+        (address[] memory tokens,) = decodePath(path);
         emit PathBlacklisted(tokens[0], tokens[tokens.length - 1], path);
     }
 
     /// @inheritdoc ISwapAdapter
-    function previewSwap(
-        address tokenIn,
-        address tokenOut,
-        uint256 amountIn,
-        bytes memory data
-    ) external view override returns (uint256 amountOut) {}
+    function previewSwap(address tokenIn, address tokenOut, uint256 amountIn, bytes memory data)
+        external
+        view
+        override
+        returns (uint256 amountOut)
+    {}
 
     /// @inheritdoc ISwapAdapter
     function swap(
@@ -140,14 +149,12 @@ contract UniswapV3SwapRouter02Adapter is AccessControl, ReentrancyGuard, ISwapAd
         IERC20(tokenIn).forceApprove(swapRouter02, amountIn);
 
         uint256 balanceBefore = IERC20(tokenOut).balanceOf(address(this));
-        ISwapRouter02(swapRouter02).exactInput(
-            ISwapRouter02.ExactInputParams({
-                amountIn: amountIn,
-                amountOutMinimum: minAmountOut,
-                path: data,
-                recipient: address(this)
-            })
-        );
+        ISwapRouter02(swapRouter02)
+            .exactInput(
+                ISwapRouter02.ExactInputParams({
+                    amountIn: amountIn, amountOutMinimum: minAmountOut, path: data, recipient: address(this)
+                })
+            );
         uint256 balanceAfter = IERC20(tokenOut).balanceOf(address(this));
         uint256 deltaTokenOut = balanceAfter - balanceBefore;
         require(deltaTokenOut >= minAmountOut, SlippageCheckFailed(tokenOut, deltaTokenOut, minAmountOut));
