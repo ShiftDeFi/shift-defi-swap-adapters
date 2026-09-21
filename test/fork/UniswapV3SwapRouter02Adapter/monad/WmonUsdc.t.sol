@@ -6,7 +6,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {UniswapV3SwapRouter02Adapter} from "contracts/UniswapV3SwapRouter02Adapter.sol";
 import {IUniswapV3SwapRouter02Adapter} from "contracts/interfaces/IUniswapV3SwapRouter02Adapter.sol";
 
-import {IWMON} from "test/mocks/IWMON.sol";
+import {IWMON} from "test/dependencies/IWMON.sol";
 import {Base} from "test/Base.t.sol";
 
 /// @dev Forks Monad mainnet and swaps against the real, deployed SwapRouter02
