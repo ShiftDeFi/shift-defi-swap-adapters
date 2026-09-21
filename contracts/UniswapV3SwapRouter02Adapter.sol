@@ -29,9 +29,9 @@ contract UniswapV3SwapRouter02Adapter is AccessControl, ReentrancyGuard, ISwapAd
     /// @param whitelistManager Account that receives `WHITELIST_MANAGER_ROLE`.
     /// @param _swapRouter02 Uniswap SwapRouter02 this adapter calls.
     constructor(address defaultAdmin, address whitelistManager, address _swapRouter02) {
-        require(defaultAdmin != address(0), InvalidDefaultAdminAddress(defaultAdmin));
-        require(whitelistManager != address(0), InvalidWhitelistManagerAddress(whitelistManager));
-        require(_swapRouter02 != address(0), InvalidSwapRouterAddress(_swapRouter02));
+        require(defaultAdmin != address(0), ZeroAddress());
+        require(whitelistManager != address(0), ZeroAddress());
+        require(_swapRouter02 != address(0), ZeroAddress());
         swapRouter02 = _swapRouter02;
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
         _grantRole(WHITELIST_MANAGER_ROLE, whitelistManager);
