@@ -19,3 +19,7 @@ docs/
 node_modules/
 package-lock.json
 foundry.lock
+CLAUDE.md
+.cursor/
+.claude/
+.cursorrules/
