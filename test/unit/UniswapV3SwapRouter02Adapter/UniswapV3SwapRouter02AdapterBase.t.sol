@@ -10,16 +10,17 @@ import {ISwapRouter} from "@shift-defi/core/interfaces/ISwapRouter.sol";
 import {UniswapV3SwapRouter02Adapter} from "contracts/UniswapV3SwapRouter02Adapter.sol";
 import {IUniswapV3SwapRouter02Adapter} from "contracts/interfaces/IUniswapV3SwapRouter02Adapter.sol";
 
+import {SwapRouter02Mock} from "test/mocks/SwapRouter02Mock.sol";
 import {Base} from "test/Base.t.sol";
 
 /// @dev Path-encoding is network-agnostic, so this suite stays hermetic: mock
-/// tokens and a placeholder Uniswap router address (never actually called
-/// here). `shiftSwapRouter` is a real, deployed core-package `SwapRouter`
-/// though, not a placeholder - the adapter is whitelisted on it, matching how
+/// tokens and a mock Uniswap router (`SwapRouter02Mock`). `shiftSwapRouter`
+/// is a real, deployed core-package `SwapRouter` though, not a placeholder - the adapter is whitelisted on it, matching how
 /// it's actually reached in production. See test/fork/ for tests against a
 /// real, network-specific SwapRouter02 + pool.
 contract UniswapV3SwapRouter02AdapterBase is Base {
     IUniswapV3SwapRouter02Adapter internal uniswapV3Adapter;
+    SwapRouter02Mock internal swapRouter02Mock;
 
     ERC20Mock internal tokenA;
     ERC20Mock internal tokenB;
@@ -37,8 +38,11 @@ contract UniswapV3SwapRouter02AdapterBase is Base {
         tokenB = new ERC20Mock();
         vm.label(address(tokenB), "TOKEN_B");
 
+        swapRouter02Mock = new SwapRouter02Mock();
+        vm.label(address(swapRouter02Mock), "SWAP_ROUTER_02");
+
         uniswapV3Adapter =
-            new UniswapV3SwapRouter02Adapter(roles.defaultAdmin, roles.whitelistManager, makeAddr("SWAP_ROUTER_02"));
+            new UniswapV3SwapRouter02Adapter(roles.defaultAdmin, roles.whitelistManager, address(swapRouter02Mock));
         vm.label(address(uniswapV3Adapter), "UNISWAP_V3_SWAP_ROUTER_02");
 
         vm.prank(roles.whitelistManager);
