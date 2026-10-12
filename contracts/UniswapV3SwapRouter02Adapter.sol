@@ -144,10 +144,16 @@ contract UniswapV3SwapRouter02Adapter is AccessControl, ReentrancyGuard, ISwapAd
         bytes calldata data
     ) external payable override nonReentrant {
         require(whitelistedPaths[data], PathNotWhitelisted(data));
+        // Whitelisted paths are always >= 43 bytes, so both slices are in bounds.
+        address pathTokenIn = address(bytes20(data[:20]));
+        address pathTokenOut = address(bytes20(data[data.length - 20:]));
+        require(tokenIn == pathTokenIn, TokenInPathMismatch(tokenIn, pathTokenIn));
+        require(tokenOut == pathTokenOut, TokenOutPathMismatch(tokenOut, pathTokenOut));
 
         IERC20(tokenIn).safeTransferFrom(msg.sender, address(this), amountIn);
         IERC20(tokenIn).forceApprove(swapRouter02, amountIn);
 
+        uint256 tokenInBalanceBefore = IERC20(tokenIn).balanceOf(address(this));
         uint256 balanceBefore = IERC20(tokenOut).balanceOf(address(this));
         ISwapRouter02(swapRouter02)
             .exactInput(
@@ -155,6 +161,11 @@ contract UniswapV3SwapRouter02Adapter is AccessControl, ReentrancyGuard, ISwapAd
                     amountIn: amountIn, amountOutMinimum: minAmountOut, path: data, recipient: address(this)
                 })
             );
+        IERC20(tokenIn).forceApprove(swapRouter02, 0);
+
+        uint256 amountInSpent = tokenInBalanceBefore - IERC20(tokenIn).balanceOf(address(this));
+        require(amountInSpent == amountIn, PartialFill(amountIn, amountInSpent));
+
         uint256 balanceAfter = IERC20(tokenOut).balanceOf(address(this));
         uint256 deltaTokenOut = balanceAfter - balanceBefore;
         require(deltaTokenOut >= minAmountOut, SlippageCheckFailed(tokenOut, deltaTokenOut, minAmountOut));
