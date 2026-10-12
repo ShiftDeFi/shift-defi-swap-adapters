@@ -10,6 +10,9 @@ interface IUniswapV3SwapRouter02Adapter {
     error NotWhitelistManager(address sender);
     error InvalidPathLengths(uint256 expectedLength, uint256 actualLength);
     error ZeroHopPath();
+    error TokenInPathMismatch(address tokenIn, address pathTokenIn);
+    error TokenOutPathMismatch(address tokenOut, address pathTokenOut);
+    error PartialFill(uint256 amountIn, uint256 amountInSpent);
 
     /**
      * @notice Returns the address of the Uniswap V3 SwapRouter02 contract
