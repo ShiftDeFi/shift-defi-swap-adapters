@@ -13,12 +13,19 @@ interface IUniswapV3SwapRouter02Adapter {
     error TokenInPathMismatch(address tokenIn, address pathTokenIn);
     error TokenOutPathMismatch(address tokenOut, address pathTokenOut);
     error PartialFill(uint256 amountIn, uint256 amountInSpent);
+    error UnexpectedNativeSender(address sender);
 
     /**
      * @notice Returns the address of the Uniswap V3 SwapRouter02 contract
      * @return The immutable address of the Uniswap V3 SwapRouter02
      */
     function swapRouter02() external view returns (address);
+
+    /**
+     * @notice Returns the WETH9 token used by SwapRouter02
+     * @return The immutable WETH9 address, read from SwapRouter02 at construction
+     */
+    function weth9() external view returns (address);
 
     /**
      * @notice Returns whether a swap path is whitelisted
