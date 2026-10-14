@@ -11,6 +11,7 @@ import {UniswapV3SwapRouter02Adapter} from "contracts/UniswapV3SwapRouter02Adapt
 import {IUniswapV3SwapRouter02Adapter} from "contracts/interfaces/IUniswapV3SwapRouter02Adapter.sol";
 
 import {SwapRouter02Mock} from "test/mocks/SwapRouter02Mock.sol";
+import {WETH9Mock} from "test/mocks/WETH9Mock.sol";
 import {Base} from "test/Base.t.sol";
 
 /// @dev Path-encoding is network-agnostic, so this suite stays hermetic: mock
@@ -24,6 +25,7 @@ contract UniswapV3SwapRouter02AdapterBase is Base {
 
     ERC20Mock internal tokenA;
     ERC20Mock internal tokenB;
+    WETH9Mock internal weth9;
 
     uint24 internal constant FEE = 3000;
 
@@ -38,11 +40,17 @@ contract UniswapV3SwapRouter02AdapterBase is Base {
         tokenB = new ERC20Mock();
         vm.label(address(tokenB), "TOKEN_B");
 
-        swapRouter02Mock = new SwapRouter02Mock();
+        weth9 = new WETH9Mock();
+        vm.label(address(weth9), "WETH9");
+
+        swapRouter02Mock = new SwapRouter02Mock(address(weth9));
         vm.label(address(swapRouter02Mock), "SWAP_ROUTER_02");
 
-        uniswapV3Adapter =
-            new UniswapV3SwapRouter02Adapter(roles.defaultAdmin, roles.whitelistManager, address(swapRouter02Mock));
+        uniswapV3Adapter = new UniswapV3SwapRouter02Adapter(
+            roles.defaultAdmin,
+            roles.whitelistManager,
+            address(swapRouter02Mock)
+        );
         vm.label(address(uniswapV3Adapter), "UNISWAP_V3_SWAP_ROUTER_02");
 
         vm.prank(roles.whitelistManager);
@@ -51,19 +59,24 @@ contract UniswapV3SwapRouter02AdapterBase is Base {
 
     function _deployShiftSwapRouter() internal returns (address) {
         address implementation = address(new SwapRouter());
-        return address(
-            new TransparentUpgradeableProxy(
-                implementation,
-                roles.defaultAdmin,
-                abi.encodeWithSelector(SwapRouter.initialize.selector, roles.defaultAdmin, roles.whitelistManager)
-            )
-        );
+        return
+            address(
+                new TransparentUpgradeableProxy(
+                    implementation,
+                    roles.defaultAdmin,
+                    abi.encodeWithSelector(SwapRouter.initialize.selector, roles.defaultAdmin, roles.whitelistManager)
+                )
+            );
     }
 
     function _whitelistPath() internal returns (bytes memory path) {
+        return _whitelistPath(address(tokenA), address(tokenB));
+    }
+
+    function _whitelistPath(address tokenIn, address tokenOut) internal returns (bytes memory path) {
         address[] memory tokens = new address[](2);
-        tokens[0] = address(tokenA);
-        tokens[1] = address(tokenB);
+        tokens[0] = tokenIn;
+        tokens[1] = tokenOut;
 
         uint24[] memory fees = new uint24[](1);
         fees[0] = FEE;

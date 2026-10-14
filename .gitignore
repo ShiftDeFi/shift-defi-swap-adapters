@@ -23,3 +23,5 @@ CLAUDE.md
 .cursor/
 .claude/
 .cursorrules/
+
+lcov.info
