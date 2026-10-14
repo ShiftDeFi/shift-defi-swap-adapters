@@ -8,6 +8,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {ISwapAdapter} from "@shift-defi/core/interfaces/ISwapAdapter.sol";
+import {IWETH9} from "./dependencies/IWETH9.sol";
 import {ISwapRouter02} from "./dependencies/uniswap-v3/ISwapRouter02.sol";
 import {IUniswapV3SwapRouter02Adapter} from "./interfaces/IUniswapV3SwapRouter02Adapter.sol";
 
@@ -21,6 +22,7 @@ contract UniswapV3SwapRouter02Adapter is AccessControl, ReentrancyGuard, ISwapAd
     bytes32 private constant WHITELIST_MANAGER_ROLE = keccak256("WHITELIST_MANAGER_ROLE");
 
     address public immutable swapRouter02;
+    address public immutable weth9;
     mapping(bytes => bool) public whitelistedPaths;
 
     /// @dev Grants `DEFAULT_ADMIN_ROLE` to `defaultAdmin` and
@@ -33,8 +35,14 @@ contract UniswapV3SwapRouter02Adapter is AccessControl, ReentrancyGuard, ISwapAd
         require(whitelistManager != address(0), ZeroAddress());
         require(_swapRouter02 != address(0), ZeroAddress());
         swapRouter02 = _swapRouter02;
+        weth9 = ISwapRouter02(_swapRouter02).WETH9();
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
         _grantRole(WHITELIST_MANAGER_ROLE, whitelistManager);
+    }
+
+    /// @dev Only SwapRouter02's `refundETH` sends native tokens here (see `swap`).
+    receive() external payable {
+        require(msg.sender == swapRouter02, UnexpectedNativeSender(msg.sender));
     }
 
     modifier onlyWhitelistManager() {
@@ -43,11 +51,10 @@ contract UniswapV3SwapRouter02Adapter is AccessControl, ReentrancyGuard, ISwapAd
     }
 
     /// @inheritdoc IUniswapV3SwapRouter02Adapter
-    function whitelistPath(address[] memory tokens, uint24[] memory fees)
-        external
-        onlyWhitelistManager
-        returns (bytes memory)
-    {
+    function whitelistPath(
+        address[] memory tokens,
+        uint24[] memory fees
+    ) external onlyWhitelistManager returns (bytes memory) {
         require(tokens.length == fees.length + 1, InvalidPathLengths(tokens.length, fees.length));
         require(fees.length > 0, ZeroHopPath());
 
@@ -122,17 +129,17 @@ contract UniswapV3SwapRouter02Adapter is AccessControl, ReentrancyGuard, ISwapAd
         require(whitelistedPaths[path], PathNotWhitelisted(path));
         whitelistedPaths[path] = false;
 
-        (address[] memory tokens,) = decodePath(path);
+        (address[] memory tokens, ) = decodePath(path);
         emit PathBlacklisted(tokens[0], tokens[tokens.length - 1], path);
     }
 
     /// @inheritdoc ISwapAdapter
-    function previewSwap(address tokenIn, address tokenOut, uint256 amountIn, bytes memory data)
-        external
-        view
-        override
-        returns (uint256 amountOut)
-    {}
+    function previewSwap(
+        address tokenIn,
+        address tokenOut,
+        uint256 amountIn,
+        bytes memory data
+    ) external view override returns (uint256 amountOut) {}
 
     /// @inheritdoc ISwapAdapter
     function swap(
@@ -151,16 +158,30 @@ contract UniswapV3SwapRouter02Adapter is AccessControl, ReentrancyGuard, ISwapAd
         require(tokenOut == pathTokenOut, TokenOutPathMismatch(tokenOut, pathTokenOut));
 
         IERC20(tokenIn).safeTransferFrom(msg.sender, address(this), amountIn);
+
+        address weth9Cached = weth9;
+        if (tokenIn == weth9Cached) {
+            uint256 nativeBalanceBefore = address(this).balance;
+            ISwapRouter02(swapRouter02).refundETH();
+            uint256 refunded = address(this).balance - nativeBalanceBefore;
+            if (refunded > 0) {
+                IWETH9(weth9Cached).deposit{value: refunded}();
+                amountIn += refunded;
+            }
+        }
+
         IERC20(tokenIn).forceApprove(swapRouter02, amountIn);
 
         uint256 tokenInBalanceBefore = IERC20(tokenIn).balanceOf(address(this));
         uint256 balanceBefore = IERC20(tokenOut).balanceOf(address(this));
-        ISwapRouter02(swapRouter02)
-            .exactInput(
-                ISwapRouter02.ExactInputParams({
-                    amountIn: amountIn, amountOutMinimum: minAmountOut, path: data, recipient: address(this)
-                })
-            );
+        ISwapRouter02(swapRouter02).exactInput(
+            ISwapRouter02.ExactInputParams({
+                amountIn: amountIn,
+                amountOutMinimum: minAmountOut,
+                path: data,
+                recipient: address(this)
+            })
+        );
         IERC20(tokenIn).forceApprove(swapRouter02, 0);
 
         uint256 amountInSpent = tokenInBalanceBefore - IERC20(tokenIn).balanceOf(address(this));

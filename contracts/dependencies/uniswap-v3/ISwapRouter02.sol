@@ -10,4 +10,8 @@ interface ISwapRouter02 {
     }
 
     function exactInput(ExactInputParams memory params) external payable returns (uint256 amountOut);
+
+    function refundETH() external payable;
+
+    function WETH9() external view returns (address);
 }

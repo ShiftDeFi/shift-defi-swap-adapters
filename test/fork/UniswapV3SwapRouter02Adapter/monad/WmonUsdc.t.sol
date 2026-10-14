@@ -31,8 +31,11 @@ contract WmonUsdcForkTest is Base {
 
         vm.createSelectFork(vm.rpcUrl("monad"), MONAD_FORK_BLOCK);
 
-        uniswapV3Adapter =
-            new UniswapV3SwapRouter02Adapter(roles.defaultAdmin, roles.whitelistManager, UNISWAP_V3_SWAP_ROUTER_02);
+        uniswapV3Adapter = new UniswapV3SwapRouter02Adapter(
+            roles.defaultAdmin,
+            roles.whitelistManager,
+            UNISWAP_V3_SWAP_ROUTER_02
+        );
         vm.label(address(uniswapV3Adapter), "UNISWAP_V3_SWAP_ROUTER_02");
         vm.label(address(WMON), "WMON");
         vm.label(address(USDC), "USDC");
@@ -51,7 +54,35 @@ contract WmonUsdcForkTest is Base {
         assertEq(WMON.balanceOf(users.alice), 0, "test_Swap_WmonToUsdc: WMON not pulled from alice");
         assertGt(USDC.balanceOf(users.bob), 0, "test_Swap_WmonToUsdc: no USDC received by receiver");
         assertEq(
-            USDC.balanceOf(address(uniswapV3Adapter)), 0, "test_Swap_WmonToUsdc: USDC left stranded in the adapter"
+            USDC.balanceOf(address(uniswapV3Adapter)),
+            0,
+            "test_Swap_WmonToUsdc: USDC left stranded in the adapter"
+        );
+    }
+
+    function test_Weth9_IsWmon() public view {
+        assertEq(uniswapV3Adapter.weth9(), address(WMON), "test_Weth9_IsWmon: router WETH9 is not WMON");
+    }
+
+    /// @dev Native MON parked on the real SwapRouter02 would otherwise pay the
+    /// pool in place of the adapter's WMON and trip PartialFill.
+    function test_Swap_WmonToUsdc_RouterHoldsNative() public {
+        bytes memory path = _whitelistWmonUsdcPath();
+        _dealWmon(users.alice, AMOUNT_IN);
+        vm.deal(UNISWAP_V3_SWAP_ROUTER_02, AMOUNT_IN);
+
+        vm.startPrank(users.alice);
+        WMON.approve(address(uniswapV3Adapter), AMOUNT_IN);
+        uniswapV3Adapter.swap(address(WMON), address(USDC), AMOUNT_IN, 1, users.bob, path);
+        vm.stopPrank();
+
+        assertEq(WMON.balanceOf(users.alice), 0, "test_Swap_WmonToUsdc_RouterHoldsNative: WMON not pulled from alice");
+        assertGt(USDC.balanceOf(users.bob), 0, "test_Swap_WmonToUsdc_RouterHoldsNative: no USDC received by receiver");
+        assertEq(UNISWAP_V3_SWAP_ROUTER_02.balance, 0, "test_Swap_WmonToUsdc_RouterHoldsNative: router MON not swept");
+        assertEq(
+            WMON.balanceOf(address(uniswapV3Adapter)),
+            0,
+            "test_Swap_WmonToUsdc_RouterHoldsNative: WMON left in the adapter"
         );
     }
 

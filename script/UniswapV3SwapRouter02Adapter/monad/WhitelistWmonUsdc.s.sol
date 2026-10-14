@@ -18,8 +18,9 @@ contract WhitelistWmonUsdcScript is Script {
     bytes32 public constant WHITELIST_MANAGER_ROLE = keccak256("WHITELIST_MANAGER_ROLE");
 
     function run() public {
-        UniswapV3SwapRouter02Adapter adapter =
-            UniswapV3SwapRouter02Adapter(vm.envAddress("UNISWAP_V3_SWAP_ROUTER_02_CONTRACT"));
+        UniswapV3SwapRouter02Adapter adapter = UniswapV3SwapRouter02Adapter(
+            payable(vm.envAddress("UNISWAP_V3_SWAP_ROUTER_02_CONTRACT"))
+        );
 
         address[] memory tokens = new address[](2);
         tokens[0] = WMON;
