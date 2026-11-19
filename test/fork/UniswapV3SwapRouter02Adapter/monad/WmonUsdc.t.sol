@@ -31,11 +31,8 @@ contract WmonUsdcForkTest is Base {
 
         vm.createSelectFork(vm.rpcUrl("monad"), MONAD_FORK_BLOCK);
 
-        uniswapV3Adapter = new UniswapV3SwapRouter02Adapter(
-            roles.defaultAdmin,
-            roles.whitelistManager,
-            UNISWAP_V3_SWAP_ROUTER_02
-        );
+        uniswapV3Adapter =
+            new UniswapV3SwapRouter02Adapter(roles.defaultAdmin, roles.whitelistManager, UNISWAP_V3_SWAP_ROUTER_02);
         vm.label(address(uniswapV3Adapter), "UNISWAP_V3_SWAP_ROUTER_02");
         vm.label(address(WMON), "WMON");
         vm.label(address(USDC), "USDC");
@@ -54,9 +51,7 @@ contract WmonUsdcForkTest is Base {
         assertEq(WMON.balanceOf(users.alice), 0, "test_Swap_WmonToUsdc: WMON not pulled from alice");
         assertGt(USDC.balanceOf(users.bob), 0, "test_Swap_WmonToUsdc: no USDC received by receiver");
         assertEq(
-            USDC.balanceOf(address(uniswapV3Adapter)),
-            0,
-            "test_Swap_WmonToUsdc: USDC left stranded in the adapter"
+            USDC.balanceOf(address(uniswapV3Adapter)), 0, "test_Swap_WmonToUsdc: USDC left stranded in the adapter"
         );
     }
 

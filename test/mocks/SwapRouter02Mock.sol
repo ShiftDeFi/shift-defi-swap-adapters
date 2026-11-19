@@ -49,7 +49,7 @@ contract SwapRouter02Mock is ISwapRouter02 {
 
     function refundETH() external payable {
         if (address(this).balance > 0) {
-            (bool success, ) = msg.sender.call{value: address(this).balance}("");
+            (bool success,) = msg.sender.call{value: address(this).balance}("");
             require(success, "STE");
         }
     }

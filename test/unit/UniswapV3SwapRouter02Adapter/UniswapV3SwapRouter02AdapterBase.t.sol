@@ -46,11 +46,8 @@ contract UniswapV3SwapRouter02AdapterBase is Base {
         swapRouter02Mock = new SwapRouter02Mock(address(weth9));
         vm.label(address(swapRouter02Mock), "SWAP_ROUTER_02");
 
-        uniswapV3Adapter = new UniswapV3SwapRouter02Adapter(
-            roles.defaultAdmin,
-            roles.whitelistManager,
-            address(swapRouter02Mock)
-        );
+        uniswapV3Adapter =
+            new UniswapV3SwapRouter02Adapter(roles.defaultAdmin, roles.whitelistManager, address(swapRouter02Mock));
         vm.label(address(uniswapV3Adapter), "UNISWAP_V3_SWAP_ROUTER_02");
 
         vm.prank(roles.whitelistManager);
@@ -59,14 +56,13 @@ contract UniswapV3SwapRouter02AdapterBase is Base {
 
     function _deployShiftSwapRouter() internal returns (address) {
         address implementation = address(new SwapRouter());
-        return
-            address(
-                new TransparentUpgradeableProxy(
-                    implementation,
-                    roles.defaultAdmin,
-                    abi.encodeWithSelector(SwapRouter.initialize.selector, roles.defaultAdmin, roles.whitelistManager)
-                )
-            );
+        return address(
+            new TransparentUpgradeableProxy(
+                implementation,
+                roles.defaultAdmin,
+                abi.encodeWithSelector(SwapRouter.initialize.selector, roles.defaultAdmin, roles.whitelistManager)
+            )
+        );
     }
 
     function _whitelistPath() internal returns (bytes memory path) {
