@@ -17,7 +17,8 @@ if ! out=$(forge build contracts --sizes 2>&1); then
 fi
 
 # Fork tests pin their blocks, so a failure here is reproducible, not RPC noise.
-if ! out=$(forge test 2>&1); then
-    { echo "pre-commit: forge test failed:"; tail -n 60 <<<"$out"; } >&2
+# `just test` runs each network's fork tests under its own EVM (`--network`).
+if ! out=$(just test 2>&1); then
+    { echo "pre-commit: just test failed:"; tail -n 60 <<<"$out"; } >&2
     exit 1
 fi

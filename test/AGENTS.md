@@ -18,5 +18,11 @@
   (`vm.createSelectFork(vm.rpcUrl("monad"), MONAD_FORK_BLOCK)`). Never fork
   the latest block. Bump a block deliberately, in its own `test:` commit,
   after the suite passes at the new block.
+- Forge starts one EVM per run, tagged with a network (`ethereum` by
+  default), and refuses to fork another network's block. Fork tests for
+  a non-Ethereum network live under `test/fork/<Adapter>/<network>/` and
+  run through a `just test-<network>` recipe passing
+  `--network <network>`; a new network gets its own recipe, called from
+  `test-fork`.
 - Behaviour that does not depend on a live venue is tested in `test/unit/`
   against mocks; a fork test covers what only the live protocol can show.

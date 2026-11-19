@@ -23,17 +23,22 @@ build *args:
 build-all *args:
     forge build "$@"
 
-# Run every test; each fork test pins its own block. Extra args pass through, e.g. `just test --mt test_Swap`
+# Run every test: unit tests, then each network's fork tests. Extra args pass through, e.g. `just test --mt test_Swap`
 test *args:
-    forge test "$@"
+    {{just_executable()}} test-unit "$@"
+    {{just_executable()}} test-fork "$@"
 
 # Hermetic unit tests (mocks only, no RPC)
 test-unit *args:
     forge test --nmp "test/fork/**" "$@"
 
-# Fork tests against live networks
+# Fork tests on every network; forge runs one network's EVM per invocation
 test-fork *args:
-    forge test -vvv --mp "test/fork/**" "$@"
+    {{just_executable()}} test-monad "$@"
+
+# Monad fork tests; forging a Monad block needs a Monad EVM (`--network monad`)
+test-monad *args:
+    forge test -vvv --network monad --mp "test/fork/**/monad/**" "$@"
 
 # Format sources
 fmt:

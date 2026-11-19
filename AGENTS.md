@@ -27,7 +27,8 @@ just build-all    # tests and scripts too
 just fmt          # forge fmt
 just test         # every test, as the pre-commit hook runs it
 just test-unit    # hermetic unit tests, no RPC
-just test-fork    # fork tests under test/fork/
+just test-fork    # fork tests under test/fork/, one run per network
+just test-monad   # Monad fork tests only
 just test --mt test_Swap                           # one test
 just test --mc UniswapV3SwapRouter02AdapterSwapTest  # one contract
 just check        # fmt check + build + every test
