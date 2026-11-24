@@ -7,7 +7,9 @@ import {ISwapAdapter} from "@shift-defi/core/interfaces/ISwapAdapter.sol";
 
 import {IUniswapV3SwapRouter02Adapter} from "contracts/interfaces/IUniswapV3SwapRouter02Adapter.sol";
 
-import {UniswapV3SwapRouter02AdapterBase} from "test/unit/UniswapV3SwapRouter02Adapter/UniswapV3SwapRouter02AdapterBase.t.sol";
+import {
+    UniswapV3SwapRouter02AdapterBase
+} from "test/unit/UniswapV3SwapRouter02Adapter/UniswapV3SwapRouter02AdapterBase.t.sol";
 
 contract UniswapV3SwapRouter02AdapterSwapTest is UniswapV3SwapRouter02AdapterBase {
     uint256 internal constant AMOUNT_IN = 1 ether;
@@ -17,14 +19,8 @@ contract UniswapV3SwapRouter02AdapterSwapTest is UniswapV3SwapRouter02AdapterBas
         _fundAndApprove(users.alice, AMOUNT_IN);
 
         vm.prank(users.alice);
-        ISwapAdapter(address(uniswapV3Adapter)).swap(
-            address(tokenA),
-            address(tokenB),
-            AMOUNT_IN,
-            AMOUNT_IN,
-            users.bob,
-            path
-        );
+        ISwapAdapter(address(uniswapV3Adapter))
+            .swap(address(tokenA), address(tokenB), AMOUNT_IN, AMOUNT_IN, users.bob, path);
 
         assertEq(tokenA.balanceOf(users.alice), 0, "test_Swap: tokenA not pulled from alice");
         assertEq(tokenB.balanceOf(users.bob), AMOUNT_IN, "test_Swap: tokenB not received by receiver");
@@ -60,19 +56,11 @@ contract UniswapV3SwapRouter02AdapterSwapTest is UniswapV3SwapRouter02AdapterBas
         worthless.approve(address(uniswapV3Adapter), AMOUNT_IN);
         vm.expectRevert(
             abi.encodeWithSelector(
-                IUniswapV3SwapRouter02Adapter.TokenInPathMismatch.selector,
-                address(worthless),
-                address(tokenA)
+                IUniswapV3SwapRouter02Adapter.TokenInPathMismatch.selector, address(worthless), address(tokenA)
             )
         );
-        ISwapAdapter(address(uniswapV3Adapter)).swap(
-            address(worthless),
-            address(tokenB),
-            AMOUNT_IN,
-            0,
-            users.alice,
-            path
-        );
+        ISwapAdapter(address(uniswapV3Adapter))
+            .swap(address(worthless), address(tokenB), AMOUNT_IN, 0, users.alice, path);
         vm.stopPrank();
     }
 
@@ -84,9 +72,7 @@ contract UniswapV3SwapRouter02AdapterSwapTest is UniswapV3SwapRouter02AdapterBas
         vm.prank(users.alice);
         vm.expectRevert(
             abi.encodeWithSelector(
-                IUniswapV3SwapRouter02Adapter.TokenOutPathMismatch.selector,
-                wrongTokenOut,
-                address(tokenB)
+                IUniswapV3SwapRouter02Adapter.TokenOutPathMismatch.selector, wrongTokenOut, address(tokenB)
             )
         );
         ISwapAdapter(address(uniswapV3Adapter)).swap(address(tokenA), wrongTokenOut, AMOUNT_IN, 0, users.bob, path);
@@ -118,14 +104,8 @@ contract UniswapV3SwapRouter02AdapterSwapTest is UniswapV3SwapRouter02AdapterBas
         vm.deal(address(swapRouter02Mock), AMOUNT_IN);
 
         vm.prank(users.alice);
-        ISwapAdapter(address(uniswapV3Adapter)).swap(
-            address(tokenA),
-            address(tokenB),
-            AMOUNT_IN,
-            AMOUNT_IN,
-            users.bob,
-            path
-        );
+        ISwapAdapter(address(uniswapV3Adapter))
+            .swap(address(tokenA), address(tokenB), AMOUNT_IN, AMOUNT_IN, users.bob, path);
 
         assertEq(
             address(swapRouter02Mock).balance,
@@ -133,9 +113,7 @@ contract UniswapV3SwapRouter02AdapterSwapTest is UniswapV3SwapRouter02AdapterBas
             "test_Swap_NonWeth9_RouterNativeBalanceUntouched: router native balance swept"
         );
         assertEq(
-            tokenB.balanceOf(users.bob),
-            AMOUNT_IN,
-            "test_Swap_NonWeth9_RouterNativeBalanceUntouched: wrong amount out"
+            tokenB.balanceOf(users.bob), AMOUNT_IN, "test_Swap_NonWeth9_RouterNativeBalanceUntouched: wrong amount out"
         );
     }
 
@@ -146,7 +124,7 @@ contract UniswapV3SwapRouter02AdapterSwapTest is UniswapV3SwapRouter02AdapterBas
         vm.expectRevert(
             abi.encodeWithSelector(IUniswapV3SwapRouter02Adapter.UnexpectedNativeSender.selector, users.alice)
         );
-        (bool success, ) = address(uniswapV3Adapter).call{value: 1}("");
+        (bool success,) = address(uniswapV3Adapter).call{value: 1}("");
         success;
     }
 
@@ -158,14 +136,8 @@ contract UniswapV3SwapRouter02AdapterSwapTest is UniswapV3SwapRouter02AdapterBas
         vm.deal(address(swapRouter02Mock), routerNative);
 
         vm.prank(users.alice);
-        ISwapAdapter(address(uniswapV3Adapter)).swap(
-            address(weth9),
-            address(tokenB),
-            amountIn,
-            amountIn,
-            users.bob,
-            path
-        );
+        ISwapAdapter(address(uniswapV3Adapter))
+            .swap(address(weth9), address(tokenB), amountIn, amountIn, users.bob, path);
 
         assertEq(weth9.balanceOf(users.alice), 0, "_assertWeth9SwapPullsAdapterTokens: WETH9 not pulled from alice");
         assertEq(
@@ -174,11 +146,7 @@ contract UniswapV3SwapRouter02AdapterSwapTest is UniswapV3SwapRouter02AdapterBas
             "_assertWeth9SwapPullsAdapterTokens: refunded native not swapped for the receiver"
         );
         assertEq(address(swapRouter02Mock).balance, 0, "_assertWeth9SwapPullsAdapterTokens: router native not swept");
-        assertEq(
-            address(uniswapV3Adapter).balance,
-            0,
-            "_assertWeth9SwapPullsAdapterTokens: native left in the adapter"
-        );
+        assertEq(address(uniswapV3Adapter).balance, 0, "_assertWeth9SwapPullsAdapterTokens: native left in the adapter");
         assertEq(
             weth9.balanceOf(address(uniswapV3Adapter)),
             0,
