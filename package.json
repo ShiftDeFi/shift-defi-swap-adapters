@@ -1,5 +1,18 @@
 {
+  "name": "@shift-defi/swap-adapters",
+  "version": "0.1.0",
+  "description": "Swap adapters for Shift DeFi Platform",
+  "author": "ShiftDeFi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ShiftDeFi/shift-defi-swap-adapters"
+  },
+  "homepage": "https://shiftdefi.com/",
+  "files": [
+    "contracts/**/*.sol"
+  ],
   "dependencies": {
-    "@shift-defi/core": "^0.3.0"
+    "@shift-defi/core": "0.7.1"
   }
 }
