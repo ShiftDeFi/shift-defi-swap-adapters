@@ -1,5 +1,25 @@
 {
+  "name": "@shift-defi/swap-adapters",
+  "version": "0.1.0",
+  "description": "Swap adapters for Shift DeFi Platform",
+  "author": "ShiftDeFi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ShiftDeFi/shift-defi-swap-adapters"
+  },
+  "homepage": "https://shiftdefi.com/",
+  "files": [
+    "contracts/**/*.sol",
+    "!contracts/UniversalAdapter.sol",
+    "!contracts/interfaces/IUniversalAdapter.sol",
+    "!contracts/CustomPool.sol",
+    "!contracts/interfaces/ICustomPool.sol",
+    "!contracts/1inch",
+    "!contracts/uniswap-v3",
+    "!contracts/dependencies/uniswap-v3/IUniswapV3Factory.sol"
+  ],
   "dependencies": {
-    "@shift-defi/core": "^0.3.0"
+    "@shift-defi/core": "0.7.1"
   }
 }
