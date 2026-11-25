@@ -10,7 +10,14 @@
   },
   "homepage": "https://shiftdefi.com/",
   "files": [
-    "contracts/**/*.sol"
+    "contracts/**/*.sol",
+    "!contracts/UniversalAdapter.sol",
+    "!contracts/interfaces/IUniversalAdapter.sol",
+    "!contracts/CustomPool.sol",
+    "!contracts/interfaces/ICustomPool.sol",
+    "!contracts/1inch",
+    "!contracts/uniswap-v3",
+    "!contracts/dependencies/uniswap-v3/IUniswapV3Factory.sol"
   ],
   "dependencies": {
     "@shift-defi/core": "0.7.1"
