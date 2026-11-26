@@ -5,6 +5,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import {SwapRouter} from "@shift-defi/core/SwapRouter.sol";
+import {ISwapAdapter} from "@shift-defi/core/interfaces/ISwapAdapter.sol";
 import {ISwapRouter} from "@shift-defi/core/interfaces/ISwapRouter.sol";
 
 import {WmonUsdt0MonadAdapter} from "contracts/custom-adapters/monad/WmonUsdt0MonadAdapter.sol";
@@ -95,6 +96,50 @@ contract WmonUsdt0MonadAdapterForkTest is Base {
             "test_Swap_ViaShiftSwapRouter_Predefined: USDT0 not received by caller"
         );
         _assertAdapterClean("test_Swap_ViaShiftSwapRouter_Predefined");
+    }
+
+    function test_Swap_DustAmount_ReturnsZero() public {
+        _dealWmon(users.alice, 1);
+
+        vm.startPrank(users.alice);
+        WMON.approve(address(adapter), 1);
+        adapter.swap(address(WMON), address(USDT0), 1, 0, users.bob, "");
+        vm.stopPrank();
+
+        assertEq(WMON.balanceOf(users.alice), 0, "test_Swap_DustAmount_ReturnsZero: WMON not pulled from alice");
+        assertEq(USDT0.balanceOf(users.bob), 0, "test_Swap_DustAmount_ReturnsZero: USDT0 received for dust");
+        _assertAdapterClean("test_Swap_DustAmount_ReturnsZero");
+    }
+
+    function test_Swap_DustAmount_ViaShiftSwapRouter_Predefined() public {
+        address shiftSwapRouter = _deployShiftSwapRouter();
+
+        vm.startPrank(roles.whitelistManager);
+        ISwapRouter(shiftSwapRouter).whitelistSwapAdapter(address(adapter));
+        ISwapRouter(shiftSwapRouter).setPredefinedSwapParameters(address(WMON), address(USDT0), address(adapter), "");
+        vm.stopPrank();
+
+        _dealWmon(users.alice, 1);
+
+        vm.startPrank(users.alice);
+        WMON.approve(shiftSwapRouter, 1);
+        (bool swapped, uint256 amountOut) =
+            ISwapRouter(shiftSwapRouter).tryPredefinedSwap(address(WMON), address(USDT0), 1, 0);
+        vm.stopPrank();
+
+        assertTrue(swapped, "test_Swap_DustAmount_ViaShiftSwapRouter_Predefined: predefined swap not executed");
+        assertEq(amountOut, 0, "test_Swap_DustAmount_ViaShiftSwapRouter_Predefined: non-zero amount out");
+        _assertAdapterClean("test_Swap_DustAmount_ViaShiftSwapRouter_Predefined");
+    }
+
+    function test_RevertIf_Swap_DustAmount_MinAmountOutNotMet() public {
+        _dealWmon(users.alice, 1);
+
+        vm.startPrank(users.alice);
+        WMON.approve(address(adapter), 1);
+        vm.expectRevert(abi.encodeWithSelector(ISwapAdapter.SlippageCheckFailed.selector, address(USDT0), 0, 1));
+        adapter.swap(address(WMON), address(USDT0), 1, 1, users.bob, "");
+        vm.stopPrank();
     }
 
     function test_PreviewSwap_ReturnsZero() public view {
