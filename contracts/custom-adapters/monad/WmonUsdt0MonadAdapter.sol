@@ -55,7 +55,8 @@ contract WmonUsdt0MonadAdapter is ReentrancyGuard, IWmonUsdt0MonadAdapter {
         amountIn += _wrapRouterNative();
 
         uint256 amountUsdc = _swapWmonToUsdc(amountIn);
-        uint256 amountUsdt0 = _swapUsdcToUsdt0(amountUsdc, minAmountOut);
+        // Dust WMON buys zero USDC, and the Curve pool reverts on a zero `dx`.
+        uint256 amountUsdt0 = amountUsdc == 0 ? 0 : _swapUsdcToUsdt0(amountUsdc, minAmountOut);
 
         require(amountUsdt0 >= minAmountOut, SlippageCheckFailed(USDT0, amountUsdt0, minAmountOut));
         IERC20(USDT0).safeTransfer(receiver, amountUsdt0);
