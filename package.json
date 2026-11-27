@@ -1,6 +1,6 @@
 {
   "name": "@shift-defi/swap-adapters",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Swap adapters for Shift DeFi Platform",
   "author": "ShiftDeFi",
   "license": "MIT",
